@@ -1,0 +1,6 @@
+strategy-bridge
+numpy
+matplotlib
+scipy
+filterpy
+pygame
