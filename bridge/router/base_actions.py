@@ -178,7 +178,7 @@ class Actions:
         def __init__(
                 self,
                 target_pos: aux.Point,
-                voltage: int = 15,
+                voltage: int = const.VOLTAGE_SHOOT,
                 is_pass: bool = False,
                 is_upper: bool = False,
         ) -> None:
@@ -197,7 +197,7 @@ class KickActions:
         def __init__(
                 self,
                 target_pos: aux.Point,
-                voltage: float = 15,
+                voltage: float = const.VOLTAGE_SHOOT,
                 is_pass: bool = False,
                 is_upper: bool = False,
         ) -> None:
@@ -249,7 +249,8 @@ class DumbActions:
     class ControlVoltageAction(Action):
         """Control voltage before shooting"""
 
-        def __init__(self, ball_pos: aux.Point, voltage: float = 15, pass_pos: Optional[aux.Point] = None) -> None:
+        def __init__(self, ball_pos: aux.Point, voltage: float = const.VOLTAGE_SHOOT,
+                     pass_pos: Optional[aux.Point] = None) -> None:
             self.voltage = voltage
             self.ball_pos = ball_pos
             self.pass_pos = pass_pos
@@ -298,7 +299,7 @@ class DumbActions:
 
 def get_pass_voltage(length: float) -> int:
     """Calc voltage for pass by length"""
-    return int(aux.minmax(0.0016 * length + 2.4, 6, 15))
+    return int(aux.minmax(0.0016 * length + 2.4, 6, const.VOLTAGE_SHOOT))
 
 
 def get_grab_speed(

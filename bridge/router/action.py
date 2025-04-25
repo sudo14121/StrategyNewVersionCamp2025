@@ -23,11 +23,11 @@ class ActionDomain:
     """Data to perform an action"""
 
     def __init__(
-        self,
-        field: fld.Field,
-        game_state: const.State,
-        we_active: bool,
-        robot: rbt.Robot,
+            self,
+            field: fld.Field,
+            game_state: const.State,
+            we_active: bool,
+            robot: rbt.Robot,
     ) -> None:
         self.field = field
         self.game_state = game_state
@@ -63,6 +63,3 @@ def limit_action(_: ActionDomain, current_action: ActionValues, speed: float = c
     """Limit robot speed"""
     if current_action.vel.mag() > speed:
         current_action.vel = current_action.vel.unity() * speed
-
-    # if current_action.kicker_voltage > 6:  # QEWE
-    #     current_action.kicker_voltage = 6
