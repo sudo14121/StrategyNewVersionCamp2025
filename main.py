@@ -16,10 +16,8 @@ if __name__ == "__main__":
 
     PROCESSORS = [
         FieldCreator(
-            debug_mode=False,
+            debug_mode=True,
             debug_game_state=const.State.RUN,
-            debug_active_team=const.Color.YELLOW,
-            debug_preparation_delay=5.0,  # only for free_kick, kickoff or penalty
         ),
         SSLController(
             ally_color=const.COLOR,
