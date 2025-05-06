@@ -187,9 +187,9 @@ GRAB_AREA = GRAB_ALIGN_DIST
 GRAB_DIST = 70
 GRAB_MULT = 5  # speed = dist * mult
 GRAB_OFFSET_ANGLE = 0.55
-
-FAST_GRAB_DIST = 88
-FAST_GRAB_MULT = 4  # angle_to_turn / angle_to_grab (>2)
+if IS_SIMULATOR_USED:
+    GRAB_OFFSET_ANGLE = 0.35
+    GRAB_DIST = 85
 
 
 # VOLTAGES
