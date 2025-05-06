@@ -187,7 +187,6 @@ class Drawer(BaseProcessor):
         for image in images:
             if image.topic in [
                 drawing.ImageTopic.PATH_GENERATION,
-                drawing.ImageTopic.HIGHLIGHT,
             ]:
                 continue
             height += 20

@@ -46,7 +46,6 @@ class SSLController(BaseProcessor):
         Инициализировать контроллер
         """
         super().initialize(data_bus)
-        self.passes_reader = DataReader(data_bus, const.PASSES_TOPIC)
         self.field_reader = DataReader(data_bus, const.FIELD_TOPIC)
 
         self.robot_control_writer = DataWriter(data_bus, const.CONTROL_TOPIC, 50)
@@ -70,15 +69,6 @@ class SSLController(BaseProcessor):
         else:
             print("No new field")
 
-    def get_pass_points(self) -> None:
-        """
-        Получить точки для пасов
-        """
-        points = self.passes_reader.read_last()
-        if points is not None:
-            points = points.content
-            self.strategy.pass_points = points
-
     def control_loop(self) -> None:
         """
         Рассчитать стратегию, тактику и физику для роботов на поле
@@ -97,7 +87,6 @@ class SSLController(BaseProcessor):
         self.field.strategy_image.timer.end(time())
         if self.field.ally_color == const.COLOR:
             self.image_writer.write(self.field.strategy_image)
-            self.image_writer.write(self.field.kicks_image)
         self.field.clear_images()
 
     @debugger
@@ -108,7 +97,6 @@ class SSLController(BaseProcessor):
         self.field.strategy_image.timer.start(time())
 
         self.read_vision()
-        self.get_pass_points()
         self.control_loop()
 
         self.control_assign()

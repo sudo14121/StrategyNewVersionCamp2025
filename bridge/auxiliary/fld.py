@@ -93,7 +93,6 @@ class Field:
         self.strategy_image = drawing.Image(drawing.ImageTopic.STRATEGY)
         self.router_image = drawing.Image(drawing.ImageTopic.ROUTER)
         self.path_image = drawing.Image(drawing.ImageTopic.PATH_GENERATION)
-        self.kicks_image = drawing.Image(drawing.ImageTopic.HIGHLIGHT)
 
         self.ally_color = color
         if self.ally_color == const.COLOR:
@@ -174,7 +173,6 @@ class Field:
         self.strategy_image.clear()
         self.router_image.clear()
         self.path_image.clear()
-        self.kicks_image.clear()
 
     def active_allies(self, include_gk: bool = False) -> list[rbt.Robot]:
         """return allies on field"""

@@ -108,7 +108,6 @@ for i in range(TEAM_ROBOTS_MAX_COUNT):
 CONTROL_TOPIC = "control-topic"
 FIELD_TOPIC = "field-topic"
 IMAGE_TOPIC = "image-topic"
-PASSES_TOPIC = "passes-topic"
 ##################################################
 
 ##################################################
