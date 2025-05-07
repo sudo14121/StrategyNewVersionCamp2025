@@ -32,11 +32,11 @@ class Actions:
         """Go to point ignore obstacles"""
 
         def __init__(
-                self,
-                target_pos: aux.Point,
-                target_angle: float,
-                ball_interact: bool = False,
-                target_vel: aux.Point = aux.Point(0, 0),
+            self,
+            target_pos: aux.Point,
+            target_angle: float,
+            ball_interact: bool = False,
+            target_vel: aux.Point = aux.Point(0, 0),
         ) -> None:
             self.target_pos = target_pos
             self.target_angle = target_angle
@@ -65,7 +65,7 @@ class Actions:
         """Go to point and avoid obstacles"""
 
         def __init__(
-                self, target_pos: aux.Point, target_angle: float, ball_interact: bool = False, ignore_ball: bool = False
+            self, target_pos: aux.Point, target_angle: float, ball_interact: bool = False, ignore_ball: bool = False
         ) -> None:
             self.target_pos = target_pos
             self.target_angle = target_angle
@@ -140,11 +140,11 @@ class Actions:
 
         def is_defined(self, domain: ActionDomain) -> bool:
             return aux.dist(domain.robot.get_pos(), domain.field.ball.get_pos()) < 3000 and (
-                    domain.robot.r_id == const.GK
-                    or (
-                            not aux.is_point_inside_poly(domain.field.ball.get_pos(), domain.field.enemy_goal.hull)
-                            and not aux.is_point_inside_poly(domain.field.ball.get_pos(), domain.field.ally_goal.hull)
-                    )
+                domain.robot.r_id == const.GK
+                or (
+                    not aux.is_point_inside_poly(domain.field.ball.get_pos(), domain.field.enemy_goal.hull)
+                    and not aux.is_point_inside_poly(domain.field.ball.get_pos(), domain.field.ally_goal.hull)
+                )
             )
 
         def behavior(self, domain: ActionDomain, current_action: ActionValues) -> None:
@@ -169,6 +169,23 @@ class Actions:
             align_pos = ball_pos - aux.rotate(aux.RIGHT, self.target_angle) * const.GRAB_ALIGN_DIST
             return [Actions.GoToPoint(align_pos, self.target_angle, True)]
 
+    class Velocity(Action):
+        """Move robot with velocity and angle_speed"""
+
+        def __init__(self, velocity: aux.Point, angle: float, control_angle_by_speed: bool = False) -> None:
+            self.velocity = velocity
+            self.angle = angle  # angle to turn / angle speed
+
+            self.control_angle_by_speed = control_angle_by_speed
+
+        def behavior(self, domain: ActionDomain, current_action: ActionValues) -> None:
+
+            current_action.vel = self.velocity
+            current_action.angle = self.angle
+
+            if self.control_angle_by_speed:
+                current_action.beep = 1
+
     twisted_flag = False
     fast_twist_timer = None
 
@@ -176,11 +193,11 @@ class Actions:
         """Choose type of kick (from KickActions)"""
 
         def __init__(
-                self,
-                target_pos: aux.Point,
-                voltage: int = const.VOLTAGE_SHOOT,
-                is_pass: bool = False,
-                is_upper: bool = False,
+            self,
+            target_pos: aux.Point,
+            voltage: int = const.VOLTAGE_SHOOT,
+            is_pass: bool = False,
+            is_upper: bool = False,
         ) -> None:
             self.kick_args = (target_pos, voltage, is_pass, is_upper)
 
@@ -195,11 +212,11 @@ class KickActions:
         """Base class"""
 
         def __init__(
-                self,
-                target_pos: aux.Point,
-                voltage: float = const.VOLTAGE_SHOOT,
-                is_pass: bool = False,
-                is_upper: bool = False,
+            self,
+            target_pos: aux.Point,
+            voltage: float = const.VOLTAGE_SHOOT,
+            is_pass: bool = False,
+            is_upper: bool = False,
         ) -> None:
             self.target_pos = target_pos
             self.voltage = voltage  # ignore if is_pass
@@ -249,8 +266,9 @@ class DumbActions:
     class ControlVoltageAction(Action):
         """Control voltage before shooting"""
 
-        def __init__(self, ball_pos: aux.Point, voltage: float = const.VOLTAGE_SHOOT,
-                     pass_pos: Optional[aux.Point] = None) -> None:
+        def __init__(
+            self, ball_pos: aux.Point, voltage: float = const.VOLTAGE_SHOOT, pass_pos: Optional[aux.Point] = None
+        ) -> None:
             self.voltage = voltage
             self.ball_pos = ball_pos
             self.pass_pos = pass_pos
@@ -268,7 +286,7 @@ class DumbActions:
         """Add velocity in final target"""
 
         def __init__(
-                self, target: aux.Point, final_velocity: aux.Point, max_dist: float = 1000, min_dist: float = 200
+            self, target: aux.Point, final_velocity: aux.Point, max_dist: float = 1000, min_dist: float = 200
         ) -> None:
             self.target = target
             self.final_velocity = final_velocity
@@ -282,8 +300,7 @@ class DumbActions:
             cur_speed = self.final_velocity
             vec_to_target = self.target - domain.robot.get_pos()
             if vec_to_target.mag() > self.min_dist:
-                cur_speed = self.final_velocity * (
-                        (self.max_dist - vec_to_target.mag()) / (self.max_dist - self.min_dist))
+                cur_speed = self.final_velocity * ((self.max_dist - vec_to_target.mag()) / (self.max_dist - self.min_dist))
 
             current_action.vel += cur_speed
 
@@ -303,12 +320,12 @@ def get_pass_voltage(length: float) -> int:
 
 
 def get_grab_speed(
-        robot_pos: aux.Point,
-        transl_vel: aux.Point,
-        field: fld.Field,
-        grab_point: aux.Point,
-        grab_angle: float,
-        target_speed: float = 0,
+    robot_pos: aux.Point,
+    transl_vel: aux.Point,
+    field: fld.Field,
+    grab_point: aux.Point,
+    grab_angle: float,
+    target_speed: float = 0,
 ) -> aux.Point:
     """Calculate speed for carefully grabbing a ball"""
     ball = field.ball.get_pos()
@@ -327,11 +344,11 @@ def get_grab_speed(
     vel_to_catch = dist_to_catch * const.GRAB_MULT
 
     vel_to_catch_r = (
-            aux.scal_mult(
-                vel_to_catch,
-                aux.rotate(aux.RIGHT, grab_angle),
-            )
-            + target_speed
+        aux.scal_mult(
+            vel_to_catch,
+            aux.rotate(aux.RIGHT, grab_angle),
+        )
+        + target_speed
     )
 
     vel_to_align_r = aux.scal_mult(
@@ -361,13 +378,13 @@ def get_grab_speed(
 
 
 def draw_grabbing_image(
-        field: fld.Field,
-        grab_point: aux.Point,
-        grab_angle: float,
-        robot_pos: aux.Point,
-        vel_to_align: aux.Point,
-        vel_to_catch: aux.Point,
-        vel: aux.Point,
+    field: fld.Field,
+    grab_point: aux.Point,
+    grab_angle: float,
+    robot_pos: aux.Point,
+    vel_to_align: aux.Point,
+    vel_to_catch: aux.Point,
+    vel: aux.Point,
 ) -> None:
     """Draw a screen easily debug grabbing a ball"""
     ball = field.ball.get_pos()
@@ -439,11 +456,11 @@ def spin_with_ball(w: float, flag: bool = False) -> tuple[aux.Point, float]:
 
 
 def convert_to_screen(
-        ball_screen: aux.Point,
-        scale: float,
-        angle: float,
-        ball: aux.Point,
-        point: aux.Point,
+    ball_screen: aux.Point,
+    scale: float,
+    angle: float,
+    ball: aux.Point,
+    point: aux.Point,
 ) -> aux.Point:
     """Convert cord on field to cord on image"""
     vec_from_ball = point - ball
@@ -454,7 +471,7 @@ def convert_to_screen(
 
 
 def calc_passthrough_wp(
-        domain: ActionDomain, target: aux.Point, *, avoid_ball: bool = False, ignore_ball: bool = False
+    domain: ActionDomain, target: aux.Point, *, avoid_ball: bool = False, ignore_ball: bool = False
 ) -> Optional[aux.Point]:
     """
     Рассчитать ближайшую промежуточную путевую точку
@@ -475,13 +492,13 @@ def calc_passthrough_wp(
             )
 
         if (
-                aux.line_circle_intersect(
-                    robot.get_pos(),
-                    target,
-                    ball.get_pos(),
-                    const.ROBOT_R + ball.get_radius(),
-                )
-                is not None
+            aux.line_circle_intersect(
+                robot.get_pos(),
+                target,
+                ball.get_pos(),
+                const.ROBOT_R + ball.get_radius(),
+            )
+            is not None
         ):
             obstacles_dist.append((ball, aux.dist(ball.get_pos(), robot.get_pos())))
 
@@ -507,11 +524,11 @@ def calc_passthrough_wp(
 
 
 def calc_next_point(
-        field: fld.Field,
-        position: aux.Point,
-        target: aux.Point,
-        robot: rbt.Robot,
-        obstacles: list[Entity],
+    field: fld.Field,
+    position: aux.Point,
+    target: aux.Point,
+    robot: rbt.Robot,
+    obstacles: list[Entity],
 ) -> Optional[tuple[aux.Point, float]]:
     """Calculate next point for robot"""
     remaining_obstacles: list[Entity] = obstacles.copy()
@@ -523,11 +540,10 @@ def calc_next_point(
         time_to_reach = aux.dist(obstacle.get_pos(), position) / const.MAX_SPEED
         center = obstacle.get_pos() + obstacle.get_vel() * time_to_reach
         radius = (
-                obstacle.get_radius()
-                + const.ROBOT_R
-                + const.ROBOT_R * (
-                        robot.get_vel().mag() / const.MAX_SPEED) * 1  # <-- coefficient of fear [0; 1] for fast speed
-                + time_to_reach * obstacle.get_vel().mag() * 0.5  # <-- coefficient of fear [0; 1], for moving obst
+            obstacle.get_radius()
+            + const.ROBOT_R
+            + const.ROBOT_R * (robot.get_vel().mag() / const.MAX_SPEED) * 1  # <-- coefficient of fear [0; 1] for fast speed
+            + time_to_reach * obstacle.get_vel().mag() * 0.5  # <-- coefficient of fear [0; 1], for moving obst
         )
         # field.path_image.draw_dot(
         #     center,
@@ -535,13 +551,13 @@ def calc_next_point(
         #     radius,
         # )
         if (
-                aux.line_circle_intersect(
-                    position,
-                    target,
-                    center,
-                    radius,
-                )
-                is not None
+            aux.line_circle_intersect(
+                position,
+                target,
+                center,
+                radius,
+            )
+            is not None
         ):
             tangents = aux.get_tangent_points(center, position, radius)
             if tangents is None or len(tangents) < 2:
@@ -574,17 +590,15 @@ def calc_next_point(
                 length = path_before0[1] + path_after0[1]
                 return pth_point, length
             if (path_before0 is not None and path_after0 is not None) and (
-                    path_before1 is not None and path_after1 is not None
+                path_before1 is not None and path_after1 is not None
             ):
 
                 length0 = path_before0[1] + path_after0[1]
                 length1 = path_before1[1] + path_after1[1]
-                in_zone0 = aux.is_point_inside_poly(path_before0[0],
-                                                    field.ally_goal.big_hull) or aux.is_point_inside_poly(
+                in_zone0 = aux.is_point_inside_poly(path_before0[0], field.ally_goal.big_hull) or aux.is_point_inside_poly(
                     path_before0[0], field.enemy_goal.big_hull
                 )
-                in_zone1 = aux.is_point_inside_poly(path_before1[0],
-                                                    field.ally_goal.big_hull) or aux.is_point_inside_poly(
+                in_zone1 = aux.is_point_inside_poly(path_before1[0], field.ally_goal.big_hull) or aux.is_point_inside_poly(
                     path_before1[0], field.enemy_goal.big_hull
                 )
 

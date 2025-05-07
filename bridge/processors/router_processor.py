@@ -233,4 +233,7 @@ def action_values_to_rules(values: ActionValues, domain: ActionDomain) -> None:
 
         domain.robot.speed_x = -1 / domain.robot.k_xx * values.vel.x
         domain.robot.speed_y = 1 / domain.robot.k_yy * values.vel.y
-        domain.robot.delta_angle = values.angle
+        if const.IS_SIMULATOR_USED:
+            domain.robot.update_vel_w(values.angle)
+        else:
+            domain.robot.delta_angle = values.angle
