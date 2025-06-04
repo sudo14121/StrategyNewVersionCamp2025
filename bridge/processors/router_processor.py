@@ -3,14 +3,12 @@
 """
 
 import math
-import struct
-from time import time
+import socket
+from time import sleep, time
 from typing import Optional
 
 import attr
-import zmq
 from strategy_bridge.bus import DataBus, DataReader, DataWriter
-from strategy_bridge.common import config
 from strategy_bridge.processors import BaseProcessor
 
 from bridge import const, drawing
@@ -18,6 +16,9 @@ from bridge.auxiliary import aux, fld
 from bridge.processors.python_controller import RobotCommand
 from bridge.router.action import Action, ActionDomain, ActionValues
 from bridge.router.base_actions import Actions
+
+UDP_IP = "10.0.120.210"
+UDP_PORT = 10000
 
 
 @attr.s(auto_attribs=True)
@@ -56,9 +57,7 @@ class CommandSink(BaseProcessor):
             const.Color.YELLOW: self.waypoints_y,
         }
 
-        context = zmq.Context()
-        self.socket = context.socket(zmq.PUB)
-        self.socket.bind(f"tcp://*:{config.COMMANDS_PUBLISH_PORT}")
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def process(self) -> None:
         """
@@ -109,49 +108,65 @@ class CommandSink(BaseProcessor):
             self.field_b.clear_images()
             self.field_y.clear_images()
 
-            rules = self.get_rules()
-            self.socket.send(rules)
+            self.send_rules()
 
-    def get_rules(self) -> bytes:
+    def finalize(self) -> None:
+
+        for _ in range(50):
+            for i in range(const.TEAM_ROBOTS_MAX_COUNT):
+                packet = create_packet(i, *tuple([0] * 11))
+                self.sock.sendto(packet, (UDP_IP, UDP_PORT))
+            sleep(0.001)
+            continue
+
+        self.sock.close()
+
+    def send_rules(self) -> None:
         """
         Сформировать массив команд для отправки на роботов
         """
-        rules: list[float] = []
 
         if const.IS_SIMULATOR_USED:
-            b_control_team = self.field_b.allies
-            for i in range(const.TEAM_ROBOTS_MAX_COUNT):
-                rules.append(0)
-                rules.append(b_control_team[i].speed_x)
-                rules.append(b_control_team[i].speed_y)
-                rules.append(b_control_team[i].speed_r)
-                rules.append(b_control_team[i].kick_up_)
-                rules.append(b_control_team[i].kick_forward_)
-                rules.append(b_control_team[i].auto_kick_)
-                rules.append(min(float(b_control_team[i].kicker_voltage_ / 1.5), 7))
-                rules.append(b_control_team[i].dribbler_speed_ > 0)
-                rules.append(b_control_team[i].dribbler_speed_)
-                rules.append(b_control_team[i].kicker_voltage_ > 0)
-                rules.append(b_control_team[i].beep)
-                rules.append(0)
+            return
+            # b_control_team = self.field_b.allies
+            # for i in range(const.TEAM_ROBOTS_MAX_COUNT):
+            #     rules.append(0)
+            #     rules.append(b_control_team[i].speed_x)
+            #     rules.append(b_control_team[i].speed_y)
+            #     rules.append(b_control_team[i].speed_r)
+            #     rules.append(b_control_team[i].kick_up_)
+            #     rules.append(b_control_team[i].kick_forward_)
+            #     rules.append(b_control_team[i].auto_kick_)
+            #     rules.append(min(float(b_control_team[i].kicker_voltage_ / 1.5), 7))
+            #     rules.append(b_control_team[i].dribbler_speed_ > 0)
+            #     rules.append(b_control_team[i].dribbler_speed_)
+            #     rules.append(b_control_team[i].kicker_voltage_ > 0)
+            #     rules.append(b_control_team[i].beep)
+            #     rules.append(0)
 
-            y_control_team = self.field_y.allies
-            for i in range(const.TEAM_ROBOTS_MAX_COUNT):
-                rules.append(0)
-                rules.append(y_control_team[i].speed_x)
-                rules.append(y_control_team[i].speed_y)
-                rules.append(y_control_team[i].speed_r)
-                rules.append(y_control_team[i].kick_up_)
-                rules.append(y_control_team[i].kick_forward_)
-                rules.append(y_control_team[i].auto_kick_)
-                rules.append(min(float(y_control_team[i].kicker_voltage_ / 1.5), 7))
-                rules.append(y_control_team[i].dribbler_speed_ > 0)
-                rules.append(y_control_team[i].dribbler_speed_)
-                rules.append(y_control_team[i].kicker_voltage_ > 0)
-                rules.append(b_control_team[i].beep)
-                rules.append(0)
+            # y_control_team = self.field_y.allies
+            # for i in range(const.TEAM_ROBOTS_MAX_COUNT):
+            #     rules.append(0)
+            #     rules.append(y_control_team[i].speed_x)
+            #     rules.append(y_control_team[i].speed_y)
+            #     rules.append(y_control_team[i].speed_r)
+            #     rules.append(y_control_team[i].kick_up_)
+            #     rules.append(y_control_team[i].kick_forward_)
+            #     rules.append(y_control_team[i].auto_kick_)
+            #     rules.append(min(float(y_control_team[i].kicker_voltage_ / 1.5), 7))
+            #     rules.append(y_control_team[i].dribbler_speed_ > 0)
+            #     rules.append(y_control_team[i].dribbler_speed_)
+            #     rules.append(y_control_team[i].kicker_voltage_ > 0)
+            #     rules.append(b_control_team[i].beep)
+            #     rules.append(0)
         else:
+
             for i in range(const.TEAM_ROBOTS_MAX_COUNT):
+                # packet = create_packet(i, *tuple([15] * 11))
+                # self.sock.sendto(packet, (UDP_IP, UDP_PORT))
+                # print(f"send 15s to {i} robot")
+                # continue
+
                 ctrl_idx = const.CONTROL_MAPPING[i]
                 if self.field[const.COLOR].allies[ctrl_idx].is_used():
                     control_robot = self.field[const.COLOR].allies[ctrl_idx]
@@ -160,10 +175,7 @@ class CommandSink(BaseProcessor):
                 elif self.field_b.allies[ctrl_idx].is_used():
                     control_robot = self.field_b.allies[ctrl_idx]
                 else:
-                    for _ in range(13):
-                        rules.append(0)
                     continue
-                # control_team = self.field_y.allies
 
                 if i in const.REVERSED_KICK:
                     control_robot.kick_forward_, control_robot.kick_up_ = (
@@ -181,29 +193,22 @@ class CommandSink(BaseProcessor):
                     * (100 / math.log(18 + 1))
                 )
 
-                rules.append(0)
-                rules.append(control_robot.speed_x)
-                rules.append(control_robot.speed_y)
-                # angle_info = math.copysign(50, -control_robot.get_anglevel())
-                # angle_info = math.copysign(50, time() % 2 - 1)
-                # print(angle_info)
-                rules.append(angle_info)
-                rules.append(control_robot.kick_up_)
-                rules.append(control_robot.kick_forward_)
-                rules.append(control_robot.auto_kick_)
-                rules.append(control_robot.kicker_voltage_)
-                rules.append(control_robot.dribbler_speed_ > 0)
-                rules.append(control_robot.dribbler_speed_)
-                rules.append(control_robot.kicker_voltage_ > 0)
-                rules.append(control_robot.beep)
-                rules.append(0)
-            for _ in range(const.TEAM_ROBOTS_MAX_COUNT):
-                for _ in range(13):
-                    rules.append(0)
+                packet = create_packet(
+                    i,
+                    int(control_robot.speed_x),
+                    int(control_robot.speed_y),
+                    int(angle_info),
+                    control_robot.dribbler_speed_,
+                    control_robot.kicker_voltage_,
+                    control_robot.kick_up_,
+                    control_robot.kick_forward_,
+                    control_robot.beep,
+                    control_robot.dribbler_speed_ > 0,
+                    control_robot.kicker_voltage_ > 0,
+                    control_robot.auto_kick_,
+                )
 
-        # rules = [15] * 13 * 32
-        b = bytes()
-        return b.join((struct.pack("d", rule) for rule in rules))
+                self.sock.sendto(packet, (UDP_IP, UDP_PORT))
 
 
 def action_values_to_rules(values: ActionValues, domain: ActionDomain) -> None:
@@ -233,7 +238,38 @@ def action_values_to_rules(values: ActionValues, domain: ActionDomain) -> None:
 
         domain.robot.speed_x = -1 / domain.robot.k_xx * values.vel.x
         domain.robot.speed_y = 1 / domain.robot.k_yy * values.vel.y
-        if const.IS_SIMULATOR_USED:
-            domain.robot.update_vel_w(values.angle)
-        else:
-            domain.robot.delta_angle = values.angle
+        domain.robot.delta_angle = values.angle
+
+
+def create_packet(
+    bot_number: int,  # unsigned byte (0-255)
+    speed_x: int,  # signed byte (-128 to 127)
+    speed_y: int,  # signed byte
+    speed_w: int,  # signed byte
+    dribbler_speed: int,  # unsigned byte
+    kicker_voltage: int,  # unsigned byte
+    kick_up: int,  # boolean flag (bit 0)
+    kick_down: int,  # boolean flag (bit 1)
+    beep: int,  # boolean flag (bit 2)
+    dribbler_en: int,  # boolean flag (bit 3)
+    charge_en: int,  # boolean flag (bit 4)
+    autokick: int,  # unsigned byte
+) -> bytes:
+    # Convert all values to bytes and pack into a list
+    bytes_list = [
+        0x01,  # Header
+        bot_number,
+        speed_x.to_bytes(1, "big", signed=True)[0],
+        speed_y.to_bytes(1, "big", signed=True)[0],
+        speed_w.to_bytes(1, "big", signed=True)[0],
+        dribbler_speed,
+        kicker_voltage,
+        kick_up,
+        kick_down,
+        beep,
+        dribbler_en,
+        charge_en,
+        autokick,
+    ]
+
+    return bytes(bytes_list)

@@ -3,19 +3,21 @@ draw field with robots and trajectory
 """
 
 from enum import Enum
-from typing import Optional
+from typing import Any
 
-from bridge import const
 from bridge.auxiliary import aux
 
 
 class ImageTopic(Enum):
     """Topic for commands to draw"""
 
-    FIELD = -1
     STRATEGY = 0
     ROUTER = 1
     PATH_GENERATION = 2
+    PASSES = 3
+    HIGHLIGHT = 4
+
+    FIELD = 10
 
 
 class Command:
@@ -26,12 +28,10 @@ class Command:
         color: tuple[int, int, int],
         dots: list[tuple[float, float]],
         size: float,
-        scale: bool = True,
     ) -> None:
         self.color = color
         self.dots = dots
         self.size = size
-        self.scale = scale
 
 
 class Image:
@@ -39,29 +39,32 @@ class Image:
     class with image's specs
     """
 
-    def __init__(self, topic: Optional[ImageTopic] = None) -> None:
-        self.topic: Optional[ImageTopic] = topic
+    def __init__(self, topic: ImageTopic) -> None:
+        self.topic: ImageTopic = topic
         self.timer: FeedbackTimer = FeedbackTimer(0, 1, 1)
 
-        self.commands: list[Command] = []
-        self.rectangles: list[tuple[tuple[int, int, int, int], tuple[int, int, int]]] = []
-        self.prints: list[tuple[tuple[float, float], str, tuple[int, int, int], bool]] = []
+        self.data: list[dict[str, Any]] = []
 
     def clear(self) -> None:
         """clear the image"""
-        self.commands = []
-        self.prints = []
-        self.rectangles = []
+        self.data = []
 
     def draw_dot(
         self,
         pos: aux.Point,
         color: tuple[int, int, int] = (255, 0, 0),
         size_in_mms: float = 10,
-        need_to_scale: bool = True,
     ) -> None:
         """draw single point"""
-        self.commands.append(Command(color, [(pos.x, pos.y)], size_in_mms, need_to_scale))
+        self.data.append(
+            {
+                "type": "circle",
+                "x": pos.x,
+                "y": pos.y,
+                "radius": size_in_mms,
+                "color": "#{:02X}{:02X}{:02X}".format(*color),
+            }
+        )
 
     def draw_line(
         self,
@@ -69,12 +72,17 @@ class Image:
         dot2: aux.Point,
         color: tuple[int, int, int] = (255, 255, 255),
         size_in_pixels: int = 2,
-        need_to_scale: bool = True,
     ) -> None:
         """draw line"""
-        new_dots = [(dot1.x, dot1.y), (dot2.x, dot2.y)]
-
-        self.commands.append(Command(color, new_dots, size_in_pixels, need_to_scale))
+        self.data.append(
+            {
+                "type": "line",
+                "x_list": [dot1.x, dot2.x],
+                "y_list": [dot1.y, dot2.y],
+                "color": "#{:02X}{:02X}{:02X}".format(*color),
+                "width": size_in_pixels,
+            }
+        )
 
     def draw_poly(
         self,
@@ -83,11 +91,17 @@ class Image:
         size_in_pixels: int = 2,
     ) -> None:
         """Connect nearest dots with line"""
-        new_dots: list[tuple[float, float]] = []
-        for dot in dots:
-            new_dots.append((dot.x, dot.y))
-
-        self.commands.append(Command(color, new_dots, size_in_pixels))
+        x_list = [dot.x for dot in dots]
+        y_list = [dot.y for dot in dots]
+        self.data.append(
+            {
+                "type": "polygon",
+                "x_list": x_list,
+                "y_list": y_list,
+                "color": "#{:02X}{:02X}{:02X}".format(*color),
+                "width": size_in_pixels,
+            }
+        )
 
     def draw_rect(
         self,
@@ -98,9 +112,16 @@ class Image:
         color: tuple[int, int, int],
     ) -> None:
         """Draw and fill the rectangle"""
-        left = min(left, left + width)
-        top = min(top, top + heigh)
-        self.rectangles.append(((int(left), int(top), int(abs(width)), int(abs(heigh))), color))
+        self.data.append(
+            {
+                "type": "rect",
+                "x": left,
+                "y": top,
+                "width": width,
+                "height": heigh,
+                "color": "#{:02X}{:02X}{:02X}".format(*color),
+            }
+        )
 
     def draw_robot(
         self,
@@ -109,13 +130,17 @@ class Image:
         color: tuple[int, int, int] = (0, 0, 255),
     ) -> None:
         """draw robot"""
-        eye_vec = aux.rotate(aux.RIGHT, angle) * 150
-        self.draw_dot(pos, color, const.ROBOT_R)
-        self.draw_line(pos, pos + eye_vec, color, 2)
-
-    def draw_pixel(self, pos: tuple[int, int], color: tuple[int, int, int] = (255, 0, 0)) -> None:
-        """draw single point"""
-        self.commands.append(Command(color, [(pos[0], pos[1])], 1))
+        robot_type = "robot_blu"
+        if color == (255, 255, 0):
+            robot_type = "robot_yel"
+        self.data.append(
+            {
+                "type": robot_type,
+                "x": pos.x,
+                "y": pos.y,
+                "rotation": angle,
+            }
+        )
 
     def print(
         self,
@@ -125,7 +150,8 @@ class Image:
         need_to_scale: bool = True,
     ) -> None:
         """print text"""
-        self.prints.append(((pos.x, pos.y), text, color, need_to_scale))
+        # TODO
+        return
 
 
 class FeedbackTimer:
