@@ -51,7 +51,7 @@ DIV = Div.C
 COLOR = Color.BLUE
 POLARITY = 1  # -1 если ворота синих на +x; 1 если ворота синих на -x
 
-IS_SIMULATOR_USED = False
+IS_SIMULATOR_USED = True
 SELF_PLAY = False
 
 DEBUG_HALF = 0  # 1 = +x, -1 = -x, 0 = not debug
@@ -189,10 +189,12 @@ GRAB_MULT = 5  # speed = dist * mult
 GRAB_OFFSET_ANGLE = 0.55
 
 if IS_SIMULATOR_USED:
-
+    GRAB_ALIGN_DIST = 150
+    BALL_GRABBED_DIST = 150
+    GRAB_DIST = 85
+    GRAB_MULT = 5
     GRAB_OFFSET_ANGLE = 0.35
 
-    GRAB_DIST = 85
 # VOLTAGES
 VOLTAGE_SHOOT = 15
 VOLTAGE_UP = 15
