@@ -15,6 +15,28 @@ class Goal:
     """
 
     def __init__(self, goal_dx: float, goal_dy: float, pen_dx: float, pen_dy: float) -> None:
+        """
+        Location of goalkeeper area points (goal on top, down and up - bars):
+
+
+                                       ┌───────────────────────────────┐
+               center_down             │            center             │              center_up
+        ────────────◉──────────────────◉───────────────◉───────────────◉──────────────────◉──────────────
+                    │                down                            up                   │
+                    │                                                                     │
+                    │                                                                     │
+                    │                                                                     │
+                    │                                                                     │          ────> eye_up
+                    │                                                                     │
+                    │                                                                     │
+                    │                                                                     │
+                    │                                 frw                                 │
+                    ◉──────────────────────────────────◉──────────────────────────────────◉
+                 frw_down                                                              frw_up
+                                                       ||
+                                                       ||
+                                                       \/ eye_frw
+        """
         # Абсолютный центр
         self.center = aux.Point(goal_dx, 0)
 
