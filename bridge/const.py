@@ -2,7 +2,6 @@
 Определение необходимых констант
 """
 
-import math
 from enum import Enum
 
 
@@ -170,6 +169,7 @@ match DIV:
 
 # ROUTE CONSTS
 VIEW_DIST = 2500
+KEEP_BALL_DIST = 300 + ROBOT_R
 
 # is_ball_in
 GRAB_ALIGN_DIST = 130

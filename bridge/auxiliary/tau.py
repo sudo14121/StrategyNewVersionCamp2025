@@ -267,7 +267,7 @@ class PISD:
 class RateLimiter:
     """
     Ограничитель скорости роста
-    """ 
+    """
 
     def __init__(self, Ts: float, max_der: float) -> None:
         """

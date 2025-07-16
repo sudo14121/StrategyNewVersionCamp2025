@@ -23,11 +23,11 @@ class ActionDomain:
     """Data to perform an action"""
 
     def __init__(
-            self,
-            field: fld.Field,
-            game_state: const.State,
-            we_active: bool,
-            robot: rbt.Robot,
+        self,
+        field: fld.Field,
+        game_state: const.State,
+        we_active: bool,
+        robot: rbt.Robot,
     ) -> None:
         self.field = field
         self.game_state = game_state

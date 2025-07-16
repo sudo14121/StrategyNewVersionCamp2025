@@ -3,8 +3,8 @@ Class with robot actions
 """
 
 import math
-from typing import Optional
 from time import time
+from typing import Optional
 
 import bridge.auxiliary.quickhull as qh
 from bridge import const
@@ -12,7 +12,6 @@ from bridge.auxiliary import aux, fld, rbt, tau
 from bridge.auxiliary.entity import Entity
 from bridge.router.action import Action, ActionDomain, ActionValues, limit_action
 from bridge.strategy.strategy import GameStates
-
 
 # Actions: ActionDomain -> ActionValues
 

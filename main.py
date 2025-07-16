@@ -2,7 +2,6 @@
 Точка входа в стратегию
 """
 
-from strategy_bridge.processors.box_feedback_collector import BoxFeedbackCollector
 from strategy_bridge.runner import Runner
 
 from bridge import const

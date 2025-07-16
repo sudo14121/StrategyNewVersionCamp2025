@@ -13,7 +13,7 @@ class Strategy:
     """Main class of strategy"""
 
     def __init__(
-            self,
+        self,
     ) -> None:
         self.we_active = False
 
@@ -60,4 +60,3 @@ class Strategy:
             roles - robot roles sorted by priority
             robot_roles - list of robot id and role matches
         """
-        pass
