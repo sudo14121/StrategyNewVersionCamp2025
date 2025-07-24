@@ -2,17 +2,16 @@
 Модуль-прослойка между стратегией и отправкой пакетов на роботов
 """
 
-import math
-import struct
 from time import time
 from typing import Optional
 
 import attr
 import zmq
+from cattrs import unstructure
 from strategy_bridge.bus import DataBus, DataReader, DataWriter
-from strategy_bridge.common import config
 from strategy_bridge.processors import BaseProcessor
 
+import bridge.robot_command_model as rcm
 from bridge import const, drawing
 from bridge.auxiliary import aux, fld
 from bridge.processors.python_controller import RobotCommand
@@ -57,8 +56,8 @@ class CommandSink(BaseProcessor):
         }
 
         context = zmq.Context()
-        self.socket = context.socket(zmq.PUB)
-        self.socket.bind(f"tcp://*:{config.COMMANDS_PUBLISH_PORT}")
+        self.s_control = context.socket(zmq.PUB)
+        self.s_control.connect("tcp://127.0.0.1:5051")
 
     def process(self) -> None:
         """
@@ -86,6 +85,7 @@ class CommandSink(BaseProcessor):
         if updated:
             self.field[const.COLOR].router_image.timer.start(time())
             for color in [const.Color.BLUE, const.Color.YELLOW]:
+                team_commands: list[rcm.RobotCommand] = []
                 for i in range(const.TEAM_ROBOTS_MAX_COUNT):
                     if self.field[color].allies[i].is_used():
                         self.field[color].allies[i].clear_fields()
@@ -97,11 +97,16 @@ class CommandSink(BaseProcessor):
                             robot=self.field[color].allies[i],
                         )
                         values = ActionValues()
-                        # print(self.actions[color][i])
                         self.actions[color][i].process(domain, values)
-                        action_values_to_rules(values, domain)
-                        # print(domain.robot.speed_x)
-                        # print(self.field[color].allies[i])
+
+                        team_commands.append(command_from_values(i, values, domain))
+
+                if len(team_commands) > 0:
+                    control_data = rcm.RobotControlExt(
+                        isteamyellow=color == const.Color.YELLOW, robot_commands=team_commands
+                    )
+
+                    self.s_control.send_json({"transnet": "actuate_robot", "data": unstructure(control_data)})
 
             self.field[const.COLOR].router_image.timer.end(time())
             self.image_writer.write(self.field[const.COLOR].router_image)
@@ -109,110 +114,9 @@ class CommandSink(BaseProcessor):
             self.field_b.clear_images()
             self.field_y.clear_images()
 
-            rules = self.get_rules()
-            self.socket.send(rules)
 
-    def get_rules(self) -> bytes:
-        """
-        Сформировать массив команд для отправки на роботов
-        """
-        rules: list[float] = []
-
-        if const.IS_SIMULATOR_USED:
-            b_control_team = self.field_b.allies
-            for i in range(const.TEAM_ROBOTS_MAX_COUNT):
-                rules.append(0)
-                rules.append(b_control_team[i].speed_x)
-                rules.append(b_control_team[i].speed_y)
-                rules.append(b_control_team[i].speed_r)
-                rules.append(b_control_team[i].kick_up_)
-                rules.append(b_control_team[i].kick_forward_)
-                rules.append(b_control_team[i].auto_kick_)
-                rules.append(min(float(b_control_team[i].kicker_voltage_ / 1.5), 7))
-                rules.append(b_control_team[i].dribbler_speed_ > 0)
-                rules.append(b_control_team[i].dribbler_speed_)
-                rules.append(b_control_team[i].kicker_voltage_ > 0)
-                rules.append(b_control_team[i].beep)
-                rules.append(0)
-
-            y_control_team = self.field_y.allies
-            for i in range(const.TEAM_ROBOTS_MAX_COUNT):
-                rules.append(0)
-                rules.append(y_control_team[i].speed_x)
-                rules.append(y_control_team[i].speed_y)
-                rules.append(y_control_team[i].speed_r)
-                rules.append(y_control_team[i].kick_up_)
-                rules.append(y_control_team[i].kick_forward_)
-                rules.append(y_control_team[i].auto_kick_)
-                rules.append(min(float(y_control_team[i].kicker_voltage_ / 1.5), 7))
-                rules.append(y_control_team[i].dribbler_speed_ > 0)
-                rules.append(y_control_team[i].dribbler_speed_)
-                rules.append(y_control_team[i].kicker_voltage_ > 0)
-                rules.append(b_control_team[i].beep)
-                rules.append(0)
-        else:
-            for i in range(const.TEAM_ROBOTS_MAX_COUNT):
-                ctrl_idx = const.CONTROL_MAPPING[i]
-                if self.field[const.COLOR].allies[ctrl_idx].is_used():
-                    control_robot = self.field[const.COLOR].allies[ctrl_idx]
-                elif self.field_y.allies[ctrl_idx].is_used():
-                    control_robot = self.field_y.allies[ctrl_idx]
-                elif self.field_b.allies[ctrl_idx].is_used():
-                    control_robot = self.field_b.allies[ctrl_idx]
-                else:
-                    for _ in range(13):
-                        rules.append(0)
-                    continue
-                # control_team = self.field_y.allies
-
-                if i in const.REVERSED_KICK:
-                    control_robot.kick_forward_, control_robot.kick_up_ = (
-                        control_robot.kick_up_,
-                        control_robot.kick_forward_,
-                    )
-                    if control_robot.auto_kick_ == 2:
-                        control_robot.auto_kick_ = 1
-                    elif control_robot.auto_kick_ == 1:
-                        control_robot.auto_kick_ = 2
-
-                angle_info = (
-                    math.log(18 / math.pi * abs(control_robot.delta_angle) + 1)
-                    * aux.sign(control_robot.delta_angle)
-                    * (100 / math.log(18 + 1))
-                )
-
-                rules.append(0)
-                rules.append(control_robot.speed_x)
-                rules.append(control_robot.speed_y)
-                # angle_info = math.copysign(50, -control_robot.get_anglevel())
-                # angle_info = math.copysign(50, time() % 2 - 1)
-                # print(angle_info)
-                rules.append(angle_info)
-                rules.append(control_robot.kick_up_)
-                rules.append(control_robot.kick_forward_)
-                rules.append(control_robot.auto_kick_)
-                rules.append(control_robot.kicker_voltage_)
-                rules.append(control_robot.dribbler_speed_ > 0)
-                rules.append(control_robot.dribbler_speed_)
-                rules.append(control_robot.kicker_voltage_ > 0)
-                rules.append(control_robot.beep)
-                rules.append(0)
-            for _ in range(const.TEAM_ROBOTS_MAX_COUNT):
-                for _ in range(13):
-                    rules.append(0)
-
-        # rules = [15] * 13 * 32
-        b = bytes()
-        return b.join((struct.pack("d", rule) for rule in rules))
-
-
-def action_values_to_rules(values: ActionValues, domain: ActionDomain) -> None:
+def command_from_values(r_id: int, values: ActionValues, domain: ActionDomain) -> rcm.RobotCommand:
     """Turn ActionValues to commands for robots"""
-    domain.robot.kick_up_ = values.kick_up
-    domain.robot.kick_forward_ = values.kick_forward
-    domain.robot.auto_kick_ = values.auto_kick
-    domain.robot.kicker_voltage_ = values.kicker_voltage
-    domain.robot.dribbler_speed_ = values.dribbler_speed
 
     if values.beep == 0:
         domain.robot.update_vel_xy(values.vel)
@@ -237,3 +141,31 @@ def action_values_to_rules(values: ActionValues, domain: ActionDomain) -> None:
             domain.robot.update_vel_w(values.angle)
         else:
             domain.robot.delta_angle = values.angle
+
+    kick_speed = values.kicker_voltage / 2 if (values.kick_forward or values.kick_up or values.auto_kick) else 0
+    kick_angle = 40 if (values.kick_up or values.auto_kick == 2) else 0
+
+    return rcm.RobotCommand(
+        id=r_id,
+        move_command=rcm.RobotMoveCommand(
+            # wheel_velocity=rcm.MoveWheelVelocity(
+            #     front_right=0,
+            #     back_right=0,
+            #     back_left=0,
+            #     front_left=1,
+            # )
+            local_velocity=rcm.MoveLocalVelocity(
+                forward=-domain.robot.speed_x,
+                left=-domain.robot.speed_y,
+                angular=domain.robot.speed_r,
+            ),
+            # global_velocity=rcm.MoveGlobalVelocity(
+            #     x=1,
+            #     y=0,
+            #     angular=0,
+            # ),
+        ),
+        kick_speed=kick_speed,
+        kick_angle=kick_angle,
+        dribbler_speed=values.dribbler_speed,
+    )

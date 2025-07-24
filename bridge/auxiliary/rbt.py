@@ -45,9 +45,9 @@ class Robot(entity.Entity):
 
         # v! SIM
         if const.IS_SIMULATOR_USED:
-            self.k_xx = -833 / 20
-            self.k_yy = 833 / 20
-            self.k_ww = 1.25 / 20
+            self.k_xx: float = 1
+            self.k_yy: float = 1
+            self.k_ww: float = 1
             self.k_wy = -0.001
             self.t_wy = 0.15
             self.r_comp_f_dy = tau.FOD(self.t_wy, const.Ts)
@@ -77,14 +77,14 @@ class Robot(entity.Entity):
         gains_full = [2.0, 0.1, 0.05, const.MAX_SPEED]
         # gains_full = [0.3, 0.2, 1, const.MAX_SPEED]
         gains_soft = [2.0, 0.1, 0.05, const.SOFT_MAX_SPEED]
-        a_gains_full = [8, 0.1, 0, const.MAX_SPEED_R]
+        a_gains_full = [15, 0.5, 0, const.MAX_SPEED_R]
         # gains_soft = [10, 0.32, 0, const.SOFT_MAX_SPEED]
         # gains_soft = gains_full
         if const.IS_SIMULATOR_USED:
             # gains_full = [8, 0.35, 0, const.MAX_SPEED]
-            gains_full = [2.5, 0.08, 0.4, const.MAX_SPEED]
-            gains_soft = [2.5, 0.08, 0, const.SOFT_MAX_SPEED]
-            a_gains_full = [2, 0.1, 0.1, const.MAX_SPEED_R]
+            gains_full = [0.0018, 0.06, 0.0, const.MAX_SPEED]
+            gains_soft = gains_full
+            a_gains_full = [8, 0.1, 0.1, const.MAX_SPEED_R]
         # a_gains_soft = [4, 0.07, 8, const.SOFT_MAX_SPEED_R]
         a_gains_soft = a_gains_full
         # else:
