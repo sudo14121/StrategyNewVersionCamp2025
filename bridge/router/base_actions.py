@@ -509,13 +509,15 @@ def calc_passthrough_wp(
             )
 
         if (
-            aux.line_circle_intersect(
-                robot.get_pos(),
-                target,
-                ball.get_pos(),
-                const.ROBOT_R + ball.get_radius(),
+            len(
+                aux.line_circle_intersect(
+                    robot.get_pos(),
+                    target,
+                    ball.get_pos(),
+                    const.ROBOT_R + ball.get_radius(),
+                )
             )
-            is not None
+            > 0
         ):
             obstacles_dist.append((ball, aux.dist(ball.get_pos(), robot.get_pos())))
 
@@ -562,19 +564,21 @@ def calc_next_point(
             + const.ROBOT_R * (robot.get_vel().mag() / const.MAX_SPEED) * 1  # <-- coefficient of fear [0; 1] for fast speed
             + time_to_reach * obstacle.get_vel().mag() * 0.5  # <-- coefficient of fear [0; 1], for moving obst
         )
-        # field.path_image.draw_circle(
-        #     center,
-        #     (127, 127, 127),
-        #     radius,
-        # )
+        field.path_image.draw_circle(
+            center,
+            (127, 127, 127),
+            radius,
+        )
         if (
-            aux.line_circle_intersect(
-                position,
-                target,
-                center,
-                radius,
+            len(
+                aux.line_circle_intersect(
+                    position,
+                    target,
+                    center,
+                    radius,
+                )
             )
-            is not None
+            > 0
         ):
             tangents = aux.get_tangent_points(center, position, radius)
             if tangents is None or len(tangents) < 2:
