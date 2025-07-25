@@ -65,6 +65,7 @@ class CommandSink(BaseProcessor):
         """
         Метод обратного вызова процесса
         """
+        telemetry_message = drawing.get_wave() + "\n"
         updated = False
 
         new_field = self.field_reader.read_last()
@@ -87,6 +88,9 @@ class CommandSink(BaseProcessor):
         if updated:
             self.field[const.COLOR].router_image.timer.start(time())
             for color in [const.Color.BLUE, const.Color.YELLOW]:
+                team_message: str = (
+                    f"TEAM {str(color)}\n \tr_id\tvelX\tvelY\tvelR\tangle\tkickUP\tkickFRW\tautoUP\tautoFRW\tvolt\tdrib\n"
+                )
                 team_commands: list[DecoderCommand] = []
                 for i in range(const.TEAM_ROBOTS_MAX_COUNT):
                     cur_action = self.actions[color][i]
@@ -102,7 +106,9 @@ class CommandSink(BaseProcessor):
                         values = ActionValues()
                         cur_action.process(domain, values)
 
-                        team_commands.append(command_from_values(domain.field, domain.robot, values))
+                        cur_command = command_from_values(domain.field, domain.robot, values)
+                        team_commands.append(cur_command)
+                        team_message += create_telemetry(cur_command)
 
                 if len(team_commands) > 0:
                     control_data = DecoderTeamCommand(
@@ -112,11 +118,15 @@ class CommandSink(BaseProcessor):
 
                     self.s_control.send_json({"control": "actuate_robot", "data": unstructure(control_data)})
 
+                telemetry_message += team_message
+
             self.field[const.COLOR].router_image.timer.end(time())
-            self.image_writer.write(self.field[const.COLOR].router_image)
             self.image_writer.write(self.field[const.COLOR].path_image)
             self.field_b.clear_images()
             self.field_y.clear_images()
+
+        self.field[const.COLOR].router_image.send_telemetry("COMMANDS TO ROBOTS", telemetry_message)
+        self.image_writer.write(self.field[const.COLOR].router_image)
 
     def finalize(self) -> None:
 
@@ -161,7 +171,7 @@ def command_from_values(field: fld.Field, robot: rbt.Robot, values: ActionValues
         reg_vel = aux.Point(robot.speed_x, -robot.speed_y)
         field.router_image.draw_line(
             robot.get_pos(),
-            robot.get_pos() + aux.rotate(reg_vel, robot.get_angle()) * 10,
+            robot.get_pos() + aux.rotate(reg_vel, robot.get_angle()) * 50,
         )
     else:
         # print("manual speeds: ", values.vel, values.angle)
@@ -210,6 +220,24 @@ def command_from_values(field: fld.Field, robot: rbt.Robot, values: ActionValues
         left_vel=-robot.speed_y,
         angular_vel=robot.speed_r,
     )
+
+
+def create_telemetry(cmd: "DecoderCommand") -> str:
+    """Create line for telemetry for single robot"""
+    values = [
+        str(cmd.robot_id),
+        f"{cmd.forward_vel:.2f}",
+        f"{cmd.left_vel:.2f}",
+        f"{cmd.angular_vel:.2f}" if cmd.angular_vel is not None else "None",
+        f"{cmd.angle:.2f}" if cmd.angle is not None else "None",
+        str(cmd.kick_up),
+        str(cmd.kick_forward),
+        str(cmd.auto_kick_up),
+        str(cmd.auto_kick_forward),
+        str(cmd.kicker_setting),
+        str(cmd.dribbler_setting),
+    ]
+    return "\t" + "\t".join(values) + "\n"
 
 
 @attrs.define

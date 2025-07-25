@@ -2,6 +2,8 @@
 draw field with robots and trajectory
 """
 
+import math
+import time
 from enum import Enum
 from typing import Any
 
@@ -14,24 +16,8 @@ class ImageTopic(Enum):
     STRATEGY = 0
     ROUTER = 1
     PATH_GENERATION = 2
-    PASSES = 3
-    HIGHLIGHT = 4
 
     FIELD = 10
-
-
-class Command:
-    """Command to draw something"""
-
-    def __init__(
-        self,
-        color: tuple[int, int, int],
-        dots: list[tuple[float, float]],
-        size: float,
-    ) -> None:
-        self.color = color
-        self.dots = dots
-        self.size = size
 
 
 class Image:
@@ -42,6 +28,7 @@ class Image:
     def __init__(self, topic: ImageTopic) -> None:
         self.topic: ImageTopic = topic
         self.timer: FeedbackTimer = FeedbackTimer(0, 1, 1)
+        self.telemetry: list[tuple[str, str]] = []  # name and line
 
         self.data: list[dict[str, Any]] = []
 
@@ -153,6 +140,10 @@ class Image:
         # TODO
         return
 
+    def send_telemetry(self, name: str, new_telemetry: str) -> None:
+        """Send new string to telemetry console"""
+        self.telemetry.append((name, new_telemetry))
+
 
 class FeedbackTimer:
     """Class for timers on screen"""
@@ -206,3 +197,18 @@ class FeedbackTimer:
             else:
                 break
         self.memory = memory
+
+
+def get_wave() -> str:
+    wave_chars = "_▁▂▃▄▅▆▇█"
+
+    width = 40  # ширина строки
+    length = len(wave_chars)
+
+    line = ""
+    for x in range(width):
+        # Для плавного волнообразного эффекта используем синус с фазовым сдвигом по позиции
+        height_index = int((math.sin(time.time() + (x / width) * 2 * math.pi) + 1) / 2 * (length - 1))
+        line += wave_chars[height_index]
+
+    return line

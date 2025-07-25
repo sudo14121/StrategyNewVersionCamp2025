@@ -509,14 +509,7 @@ def calc_passthrough_wp(
             )
 
         if (
-            len(
-                aux.line_circle_intersect(
-                    robot.get_pos(),
-                    target,
-                    ball.get_pos(),
-                    const.ROBOT_R + ball.get_radius(),
-                )
-            )
+            len(aux.line_circle_intersect(robot.get_pos(), target, ball.get_pos(), const.ROBOT_R + ball.get_radius(), "S"))
             > 0
         ):
             obstacles_dist.append((ball, aux.dist(ball.get_pos(), robot.get_pos())))
@@ -569,17 +562,7 @@ def calc_next_point(
             (127, 127, 127),
             radius,
         )
-        if (
-            len(
-                aux.line_circle_intersect(
-                    position,
-                    target,
-                    center,
-                    radius,
-                )
-            )
-            > 0
-        ):
+        if len(aux.line_circle_intersect(position, target, center, radius, "S")) > 0:
             tangents = aux.get_tangent_points(center, position, radius)
             if tangents is None or len(tangents) < 2:
                 return None

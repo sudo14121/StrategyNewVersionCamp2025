@@ -31,7 +31,7 @@ class Drawer(BaseProcessor):
         for topic in drawing.ImageTopic:
             self.images.update({topic: drawing.Image(topic)})
 
-        context = zmq.Context()  # don't work?
+        context = zmq.Context()
         self.draw_socket = context.socket(zmq.PUB)
         self.draw_socket.connect("ipc:///tmp/ether.draw.xsub")
 
@@ -54,16 +54,19 @@ class Drawer(BaseProcessor):
             self.images[image.topic] = image
 
         all_data: dict[str, dict[str, Any]] = {}
+        telemetries: dict[str, str] = {}
 
         for topic, image in self.images.items():
             all_data.update(
                 {
                     str(topic.name): {
                         "data": image.data,
-                        "is_visible": False,
+                        "is_visible": topic in [drawing.ImageTopic.ROUTER, drawing.ImageTopic.STRATEGY],
                     }
                 }
             )
+            for name, message in image.telemetry:
+                telemetries.update({name: message})
         self.draw_socket.send_json(all_data)
 
         boarder_pos = 16
@@ -75,7 +78,6 @@ class Drawer(BaseProcessor):
             drawing.ImageTopic.FIELD,
             drawing.ImageTopic.STRATEGY,
             drawing.ImageTopic.ROUTER,
-            drawing.ImageTopic.PASSES,
         ]:
             image = self.images[image_topic]
             # if image.timer.delay_warning:
@@ -90,5 +92,5 @@ class Drawer(BaseProcessor):
 
             all_timers += delay_text + boarder_text + tps_text + "\n"
 
-        text_data = {"PROCESSORS TIMERS": all_timers}
-        self.telemetry_socket.send_json(text_data)
+        telemetries.update({"PROCESSORS TIMERS": all_timers})
+        self.telemetry_socket.send_json(telemetries)
