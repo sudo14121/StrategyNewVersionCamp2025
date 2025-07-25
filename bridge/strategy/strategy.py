@@ -81,3 +81,13 @@ class Strategy:
         - actions[9] = Actions.BallGrab(0.0)
                 The robot number 9 grabs the ball at an angle of 0.0 (it looks to the right, along the OX axis)
         """
+        """
+        sigma = aux.get_line_intersection(field.allies[0].get_pos(), field.allies[1].get_pos(), field.enemies[0].get_pos(), field.ball.get_pos(), "LL")
+        print(sigma)
+        """
+
+        #goalkeeper = aux.closest_point_on_line(field.ball.get_pos(), field.ally_goal.center, field.allies[1].get_pos(), "L")
+        angel = (field.ball.get_pos() - field.allies[1].get_pos()).arg()
+        actions[1] = Actions.GoToPoint(aux.Point(0, 0), angel)
+        #print(goalkeeper)
+        
