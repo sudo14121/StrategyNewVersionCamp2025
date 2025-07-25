@@ -380,75 +380,75 @@ def get_grab_speed(
     vel_r = vel_to_catch_r * (1 - board) + vel_to_align_r * board
     vel = vel_to_align + aux.rotate(aux.RIGHT, grab_angle) * vel_r
 
-    if aux.dist(robot_pos, grab_point) < 500:
-        draw_grabbing_image(
-            field,
-            grab_point,
-            grab_angle,
-            robot_pos,
-            transl_vel,
-            vel_to_catch,
-            vel,
-        )
+    # if aux.dist(robot_pos, grab_point) < 500:
+    #     draw_grabbing_image(
+    #         field,
+    #         grab_point,
+    #         grab_angle,
+    #         robot_pos,
+    #         transl_vel,
+    #         vel_to_catch,
+    #         vel,
+    #     )
 
     return vel
 
 
-def draw_grabbing_image(
-    field: fld.Field,
-    grab_point: aux.Point,
-    grab_angle: float,
-    robot_pos: aux.Point,
-    vel_to_align: aux.Point,
-    vel_to_catch: aux.Point,
-    vel: aux.Point,
-) -> None:
-    """Draw a screen easily debug grabbing a ball"""
-    ball = field.ball.get_pos()
+# def draw_grabbing_image(
+#     field: fld.Field,
+#     grab_point: aux.Point,
+#     grab_angle: float,
+#     robot_pos: aux.Point,
+#     vel_to_align: aux.Point,
+#     vel_to_catch: aux.Point,
+#     vel: aux.Point,
+# ) -> None:
+#     """Draw a screen easily debug grabbing a ball"""
+#     ball = field.ball.get_pos()
 
-    cord_scale = 0.8
-    vel_scale = 0.4
-    size = 200
-    angle = -grab_angle - math.pi / 2
-    if ball.x > 0:
-        middle = aux.Point(120, 680)
-    else:
-        middle = aux.Point(1080, 680)
+#     cord_scale = 0.8
+#     vel_scale = 0.4
+#     size = 200
+#     angle = -grab_angle - math.pi / 2
+#     if ball.x > 0:
+#         middle = aux.Point(120, 680)
+#     else:
+#         middle = aux.Point(1080, 680)
 
-    field.router_image.draw_rect(middle.x - size / 2, middle.y - size / 2, size, size, (200, 200, 200))
-    field.router_image.print(
-        middle - aux.Point(0, size / 2 + 10),
-        "GRABBING A BALL",
-        need_to_scale=False,
-    )
+#     field.router_image.draw_rect(middle.x - size / 2, middle.y - size / 2, size, size, (200, 200, 200))
+#     field.router_image.print(
+#         middle - aux.Point(0, size / 2 + 10),
+#         "GRABBING A BALL",
+#         need_to_scale=False,
+#     )
 
-    ball_screen = middle - aux.Point(0, size // 2 - 30)
-    center_boarder = convert_to_screen(ball_screen, cord_scale, angle, ball, grab_point)
-    center_boarder += aux.RIGHT / 2  # чтобы не мерцало, хз
-    field.router_image.draw_line(ball_screen, center_boarder, size_in_pixels=3, need_to_scale=False)
+#     ball_screen = middle - aux.Point(0, size // 2 - 30)
+#     center_boarder = convert_to_screen(ball_screen, cord_scale, angle, ball, grab_point)
+#     center_boarder += aux.RIGHT / 2  # чтобы не мерцало, хз
+#     field.router_image.draw_line(ball_screen, center_boarder, size_in_pixels=3, need_to_scale=False)
 
-    right_boarder = convert_to_screen(ball_screen, 1, -const.GRAB_OFFSET_ANGLE, ball_screen, center_boarder)
-    field.router_image.draw_line(ball_screen, right_boarder, size_in_pixels=3, need_to_scale=False)
+#     right_boarder = convert_to_screen(ball_screen, 1, -const.GRAB_OFFSET_ANGLE, ball_screen, center_boarder)
+#     field.router_image.draw_line(ball_screen, right_boarder, size_in_pixels=3, need_to_scale=False)
 
-    left_boarder = convert_to_screen(ball_screen, 1, const.GRAB_OFFSET_ANGLE, ball_screen, center_boarder)
-    field.router_image.draw_line(ball_screen, left_boarder, size_in_pixels=3, need_to_scale=False)
+#     left_boarder = convert_to_screen(ball_screen, 1, const.GRAB_OFFSET_ANGLE, ball_screen, center_boarder)
+#     field.router_image.draw_line(ball_screen, left_boarder, size_in_pixels=3, need_to_scale=False)
 
-    robot_screen = convert_to_screen(ball_screen, cord_scale, angle, ball, robot_pos)
-    cropped_robot = aux.Point(
-        aux.minmax(robot_screen.x, middle.x - size / 2, middle.x + size / 2),
-        aux.minmax(robot_screen.y, middle.y - size / 2, middle.y + size / 2),
-    )
-    field.router_image.draw_dot(cropped_robot, (0, 0, 0), 80, False)
+#     robot_screen = convert_to_screen(ball_screen, cord_scale, angle, ball, robot_pos)
+#     cropped_robot = aux.Point(
+#         aux.minmax(robot_screen.x, middle.x - size / 2, middle.x + size / 2),
+#         aux.minmax(robot_screen.y, middle.y - size / 2, middle.y + size / 2),
+#     )
+#     field.router_image.draw_dot(cropped_robot, (0, 0, 0), 80, False)
 
-    if cropped_robot == robot_screen:
-        vel_to_align_screen = convert_to_screen(robot_screen, vel_scale, angle, aux.Point(0, 0), vel_to_align)
-        field.router_image.draw_line(robot_screen, vel_to_align_screen, (100, 100, 200), 2, need_to_scale=False)
-        vel_to_catch_screen = convert_to_screen(robot_screen, vel_scale, angle, aux.Point(0, 0), vel_to_catch)
-        field.router_image.draw_line(robot_screen, vel_to_catch_screen, (200, 100, 100), 2, need_to_scale=False)
-        vel_screen = convert_to_screen(robot_screen, vel_scale, angle, aux.Point(0, 0), vel)
-        field.router_image.draw_line(robot_screen, vel_screen, (200, 100, 200), 3, need_to_scale=False)
+#     if cropped_robot == robot_screen:
+#         vel_to_align_screen = convert_to_screen(robot_screen, vel_scale, angle, aux.Point(0, 0), vel_to_align)
+#         field.router_image.draw_line(robot_screen, vel_to_align_screen, (100, 100, 200), 2, need_to_scale=False)
+#         vel_to_catch_screen = convert_to_screen(robot_screen, vel_scale, angle, aux.Point(0, 0), vel_to_catch)
+#         field.router_image.draw_line(robot_screen, vel_to_catch_screen, (200, 100, 100), 2, need_to_scale=False)
+#         vel_screen = convert_to_screen(robot_screen, vel_scale, angle, aux.Point(0, 0), vel)
+#         field.router_image.draw_line(robot_screen, vel_screen, (200, 100, 200), 3, need_to_scale=False)
 
-    field.router_image.draw_dot(ball_screen, (255, 100, 100), 50, False)
+#     field.router_image.draw_dot(ball_screen, (255, 100, 100), 50, False)
 
 
 def spin_with_ball(w: float, flag: bool = False) -> tuple[aux.Point, float]:

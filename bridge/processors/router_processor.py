@@ -2,7 +2,7 @@
 Модуль-прослойка между стратегией и отправкой пакетов на роботов
 """
 
-from time import time
+from time import sleep, time
 from typing import Optional
 
 import attr
@@ -16,6 +16,9 @@ from bridge import const, drawing
 from bridge.auxiliary import aux, fld
 from bridge.processors.python_controller import RobotCommand
 from bridge.router.action import Action, ActionDomain, ActionValues
+
+UDP_IP = "10.0.120.210"
+UDP_PORT = 10000
 
 
 @attr.s(auto_attribs=True)
@@ -103,7 +106,7 @@ class CommandSink(BaseProcessor):
 
                 if len(team_commands) > 0:
                     control_data = rcm.RobotControlExt(
-                        isteamyellow=color == const.Color.YELLOW, robot_commands=team_commands
+                        isteamyellow=(color == const.Color.YELLOW), robot_commands=team_commands
                     )
 
                     self.s_control.send_json({"transnet": "actuate_robot", "data": unstructure(control_data)})
@@ -113,6 +116,34 @@ class CommandSink(BaseProcessor):
             self.image_writer.write(self.field[const.COLOR].path_image)
             self.field_b.clear_images()
             self.field_y.clear_images()
+
+    def finalize(self) -> None:
+
+        team_commands: list[rcm.RobotCommand] = []
+        for r_id in range(const.TEAM_ROBOTS_MAX_COUNT):
+            team_commands.append(
+                rcm.RobotCommand(
+                    id=r_id,
+                    move_command=rcm.RobotMoveCommand(
+                        local_velocity=rcm.MoveLocalVelocity(
+                            forward=0,
+                            left=0,
+                            angular=0,
+                        ),
+                    ),
+                    kick_speed=0,
+                    kick_angle=0,
+                    dribbler_speed=0,
+                )
+            )
+
+        for _ in range(5):
+            for team in [True, False]:
+                control_data = rcm.RobotControlExt(isteamyellow=team, robot_commands=team_commands)
+                self.s_control.send_json({"transnet": "actuate_robot", "data": unstructure(control_data)})
+            sleep(0.001)
+
+        self.s_control.close()
 
 
 def command_from_values(r_id: int, values: ActionValues, domain: ActionDomain) -> rcm.RobotCommand:
