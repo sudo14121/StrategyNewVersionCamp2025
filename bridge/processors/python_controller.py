@@ -3,6 +3,7 @@
 """
 
 from time import time
+from typing import Optional
 
 import attr
 from strategy_bridge.bus import DataBus, DataReader, DataWriter
@@ -55,7 +56,7 @@ class SSLController(BaseProcessor):
         self.field.strategy_image.timer = drawing.FeedbackTimer(time(), 0.05, 40)
 
         self.strategy = strategy.Strategy()
-        self.actions: list[Action] = []
+        self.actions: list[Optional[Action]] = []
 
     def read_vision(self) -> None:
         """
@@ -78,9 +79,11 @@ class SSLController(BaseProcessor):
     def control_assign(self) -> None:
         """Send commands to robots"""
         for robot in self.field.active_allies(True):
-            message = RobotCommand(robot.r_id, robot.color, self.actions[robot.r_id])
+            cur_action = self.actions[robot.r_id]
+            if cur_action is not None:
+                message = RobotCommand(robot.r_id, robot.color, cur_action)
 
-            self.robot_control_writer.write(message)
+                self.robot_control_writer.write(message)
 
     def send_image(self) -> None:
         """Send commands to drawer processor"""

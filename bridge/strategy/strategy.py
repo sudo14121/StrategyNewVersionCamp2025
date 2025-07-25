@@ -3,6 +3,7 @@
 # !v DEBUG ONLY
 import math  # type: ignore
 from time import time  # type: ignore
+from typing import Optional
 
 from bridge import const
 from bridge.auxiliary import aux, fld, rbt  # type: ignore
@@ -18,7 +19,7 @@ class Strategy:
     ) -> None:
         self.we_active = False
 
-    def process(self, field: fld.Field) -> list[Action]:
+    def process(self, field: fld.Field) -> list[Optional[Action]]:
         """Game State Management"""
         if field.game_state not in [GameStates.KICKOFF, GameStates.PENALTY]:
             if field.active_team in [const.Color.ALL, field.ally_color]:
@@ -26,9 +27,9 @@ class Strategy:
             else:
                 self.we_active = False
 
-        actions: list[Action] = []
+        actions: list[Optional[Action]] = []
         for _ in range(const.TEAM_ROBOTS_MAX_COUNT):
-            actions.append(Actions.Stop())
+            actions.append(None)
 
         if field.ally_color == const.COLOR:
             text = str(field.game_state) + "  we_active:" + str(self.we_active)
@@ -39,7 +40,7 @@ class Strategy:
             case GameStates.TIMEOUT:
                 pass
             case GameStates.HALT:
-                return actions
+                return [None] * const.TEAM_ROBOTS_MAX_COUNT
             case GameStates.PREPARE_PENALTY:
                 pass
             case GameStates.PENALTY:
@@ -56,7 +57,7 @@ class Strategy:
 
         return actions
 
-    def run(self, field: fld.Field, actions: list[Action]) -> None:
+    def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         """
         ONE ITERATION of strategy
         NOTE: robots will not start acting until this function returns an array of actions,

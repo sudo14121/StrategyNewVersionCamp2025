@@ -16,7 +16,6 @@ from bridge import const, drawing
 from bridge.auxiliary import aux, fld
 from bridge.processors.python_controller import RobotCommand
 from bridge.router.action import Action, ActionDomain, ActionValues
-from bridge.router.base_actions import Actions
 
 
 @attr.s(auto_attribs=True)
@@ -48,9 +47,9 @@ class CommandSink(BaseProcessor):
 
         self.field[const.COLOR].router_image.timer = drawing.FeedbackTimer(time(), 10, 50)
 
-        self.waypoints_b: list[Action] = [Actions.Stop() for _ in range(const.TEAM_ROBOTS_MAX_COUNT)]
-        self.waypoints_y: list[Action] = [Actions.Stop() for _ in range(const.TEAM_ROBOTS_MAX_COUNT)]
-        self.actions: dict[const.Color, list[Action]] = {
+        self.waypoints_b: list[Optional[Action]] = [None for _ in range(const.TEAM_ROBOTS_MAX_COUNT)]
+        self.waypoints_y: list[Optional[Action]] = [None for _ in range(const.TEAM_ROBOTS_MAX_COUNT)]
+        self.actions: dict[const.Color, list[Optional[Action]]] = {
             const.Color.BLUE: self.waypoints_b,
             const.Color.YELLOW: self.waypoints_y,
         }
@@ -87,7 +86,8 @@ class CommandSink(BaseProcessor):
             for color in [const.Color.BLUE, const.Color.YELLOW]:
                 team_commands: list[rcm.RobotCommand] = []
                 for i in range(const.TEAM_ROBOTS_MAX_COUNT):
-                    if self.field[color].allies[i].is_used():
+                    cur_action = self.actions[color][i]
+                    if self.field[color].allies[i].is_used() and cur_action is not None:
                         self.field[color].allies[i].clear_fields()
 
                         domain = ActionDomain(
@@ -97,7 +97,7 @@ class CommandSink(BaseProcessor):
                             robot=self.field[color].allies[i],
                         )
                         values = ActionValues()
-                        self.actions[color][i].process(domain, values)
+                        cur_action.process(domain, values)
 
                         team_commands.append(command_from_values(i, values, domain))
 
