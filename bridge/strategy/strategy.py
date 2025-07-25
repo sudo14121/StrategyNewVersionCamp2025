@@ -18,6 +18,7 @@ class Strategy:
         self,
     ) -> None:
         self.we_active = False
+        self.pointNum = 1
 
     def process(self, field: fld.Field) -> list[Optional[Action]]:
         """Game State Management"""
@@ -96,8 +97,8 @@ class Strategy:
             actions[idx] = Actions.GoToPointIgnore(ball, angel)
         #print(goalkeeper)
         """
-        angel = (field.allies[0].get_pos() - field.allies[idx].get_pos()).arg()
+        """angel = (field.allies[0].get_pos() - field.allies[idx].get_pos()).arg()
         go = aux.dist(field.allies[0].get_pos(), field.enemies[0].get_pos())
         go = go / 7 * 2.5
         idxGo = aux.point_on_line(field.allies[0].get_pos(), field.enemies[0].get_pos(), go)
-        actions[idx] = Actions.GoToPointIgnore(idxGo, angel)
+        actions[idx] = Actions.GoToPointIgnore(idxGo, angel)"""
