@@ -85,8 +85,9 @@ class Strategy:
         sigma = aux.get_line_intersection(field.allies[0].get_pos(), field.allies[1].get_pos(), field.enemies[0].get_pos(), field.ball.get_pos(), "LL")
         print(sigma)
         """
-        idx = 0
+        idx = 1
         #goalkeeper = aux.closest_point_on_line(field.ball.get_pos(), field.ally_goal.center, field.allies[1].get_pos(), "L")
+        """
         angel = (field.ball.get_pos() - field.allies[idx].get_pos()).arg()
         ball = field.ball.get_pos()
         if ball.x > 2000:
@@ -94,4 +95,9 @@ class Strategy:
         else:
             actions[idx] = Actions.GoToPointIgnore(ball, angel)
         #print(goalkeeper)
-        
+        """
+        angel = (field.allies[0].get_pos() - field.allies[idx].get_pos()).arg()
+        go = aux.dist(field.allies[0].get_pos(), field.enemies[0].get_pos())
+        go = go / 7 * 2.5
+        idxGo = aux.point_on_line(field.allies[0].get_pos(), field.enemies[0].get_pos(), go)
+        actions[idx] = Actions.GoToPointIgnore(idxGo, angel)
