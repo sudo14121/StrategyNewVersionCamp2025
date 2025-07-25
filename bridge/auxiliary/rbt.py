@@ -45,7 +45,7 @@ class Robot(entity.Entity):
 
         # v! SIM
         if const.IS_SIMULATOR_USED:
-            self.k_xx: float = 1
+            self.k_xx: float = -1
             self.k_yy: float = 1
             self.k_ww: float = 1
             self.k_wy = -0.001

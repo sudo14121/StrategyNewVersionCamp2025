@@ -63,7 +63,7 @@ class Actions:
             cur_vel_abs = aux.rotate(current_action.vel, cur_robot.get_angle())
             prev_vel_abs = aux.rotate(cur_robot.prev_sended_vel, cur_robot.prev_sended_angle)
             if (cur_vel_abs - prev_vel_abs).mag() / (time() - cur_robot.prev_sended_time) > const.MAX_ACCELERATION:
-                # domain.field.router_image.draw_dot(aux.Point(0, 1000), size_in_mms=200)
+                # domain.field.router_image.draw_circle(aux.Point(0, 1000), size_in_mms=200)
                 current_action.vel = aux.rotate(
                     prev_vel_abs
                     + (cur_vel_abs - prev_vel_abs).unity() * const.MAX_ACCELERATION * (time() - cur_robot.prev_sended_time),
@@ -118,7 +118,7 @@ class Actions:
             if pint is not None:
                 convex_hull = qh.shortesthull(domain.robot.get_pos(), next_point, domain.field.enemy_goal.big_hull)
                 for j in range(len(convex_hull) - 2, 0, -1):
-                    domain.field.path_image.draw_dot(convex_hull[j], (150, 0, 150), 100)
+                    domain.field.path_image.draw_circle(convex_hull[j], (150, 0, 150), 100)
                     next_point = convex_hull[j]
 
             avoid_ball = domain.game_state in [GameStates.STOP, GameStates.PREPARE_KICKOFF] or not domain.we_active
@@ -438,7 +438,7 @@ def get_grab_speed(
 #         aux.minmax(robot_screen.x, middle.x - size / 2, middle.x + size / 2),
 #         aux.minmax(robot_screen.y, middle.y - size / 2, middle.y + size / 2),
 #     )
-#     field.router_image.draw_dot(cropped_robot, (0, 0, 0), 80, False)
+#     field.router_image.draw_circle(cropped_robot, (0, 0, 0), 80, False)
 
 #     if cropped_robot == robot_screen:
 #         vel_to_align_screen = convert_to_screen(robot_screen, vel_scale, angle, aux.Point(0, 0), vel_to_align)
@@ -448,7 +448,7 @@ def get_grab_speed(
 #         vel_screen = convert_to_screen(robot_screen, vel_scale, angle, aux.Point(0, 0), vel)
 #         field.router_image.draw_line(robot_screen, vel_screen, (200, 100, 200), 3, need_to_scale=False)
 
-#     field.router_image.draw_dot(ball_screen, (255, 100, 100), 50, False)
+#     field.router_image.draw_circle(ball_screen, (255, 100, 100), 50, False)
 
 
 def spin_with_ball(w: float, flag: bool = False) -> tuple[aux.Point, float]:
@@ -562,7 +562,7 @@ def calc_next_point(
             + const.ROBOT_R * (robot.get_vel().mag() / const.MAX_SPEED) * 1  # <-- coefficient of fear [0; 1] for fast speed
             + time_to_reach * obstacle.get_vel().mag() * 0.5  # <-- coefficient of fear [0; 1], for moving obst
         )
-        # field.path_image.draw_dot(
+        # field.path_image.draw_circle(
         #     center,
         #     (127, 127, 127),
         #     radius,

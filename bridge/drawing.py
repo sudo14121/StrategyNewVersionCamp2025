@@ -49,7 +49,7 @@ class Image:
         """clear the image"""
         self.data = []
 
-    def draw_dot(
+    def draw_circle(
         self,
         pos: aux.Point,
         color: tuple[int, int, int] = (255, 0, 0),
@@ -70,8 +70,8 @@ class Image:
         self,
         dot1: aux.Point,
         dot2: aux.Point,
-        color: tuple[int, int, int] = (255, 255, 255),
-        size_in_pixels: int = 2,
+        color: tuple[int, int, int] = (200, 200, 200),
+        size_in_pixels: int = 10,
     ) -> None:
         """draw line"""
         self.data.append(
@@ -109,7 +109,7 @@ class Image:
         top: float,
         width: float,
         heigh: float,
-        color: tuple[int, int, int],
+        color: tuple[int, int, int] = (127, 127, 127),
     ) -> None:
         """Draw and fill the rectangle"""
         self.data.append(
@@ -123,24 +123,24 @@ class Image:
             }
         )
 
-    def draw_robot(
-        self,
-        pos: aux.Point,
-        angle: float = 0.0,
-        color: tuple[int, int, int] = (0, 0, 255),
-    ) -> None:
-        """draw robot"""
-        robot_type = "robot_blu"
-        if color == (255, 255, 0):
-            robot_type = "robot_yel"
-        self.data.append(
-            {
-                "type": robot_type,
-                "x": pos.x,
-                "y": pos.y,
-                "rotation": angle,
-            }
-        )
+    # def draw_robot(
+    #     self,
+    #     pos: aux.Point,
+    #     angle: float = 0.0,
+    #     color: tuple[int, int, int] = (0, 0, 255),
+    # ) -> None:
+    #     """draw robot"""
+    #     robot_type = "robot_blu"
+    #     if color == (255, 255, 0):
+    #         robot_type = "robot_yel"
+    #     self.data.append(
+    #         {
+    #             "type": robot_type,
+    #             "x": pos.x,
+    #             "y": pos.y,
+    #             "rotation": angle,
+    #         }
+    #     )
 
     def print(
         self,
