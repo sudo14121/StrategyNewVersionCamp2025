@@ -162,3 +162,15 @@ class Strategy:
                 self.pointNum = 1
         angel = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
         actions[self.idx] = Actions.GoToPointIgnore(x, angel)
+
+        angelBlue0 = field.enemies[0].get_angle()
+        angelYel0 = field.allies[0].get_angle()
+
+        vecB0 = field.enemies[0].get_pos().unity()
+        vecB0 = aux.rotate(vecB0, angelBlue0)
+
+        vecY0 = field.allies[0].get_pos().unity()
+        vecY0 = aux.rotate(vecB0, angelYel0)
+
+        pointinter = aux.get_line_intersection(vecB0, vecB0 * 500, vecY0, vecY0 * 500, "LL")
+        print(pointinter)
