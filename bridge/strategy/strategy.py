@@ -163,10 +163,9 @@ class Strategy:
             print("Нет пересечений")
         else:
             mediana = (pointinter1 + pointinter2 + pointinter3) / 3 
-            
-        
-        vecBallRobot2 = aux.point_on_line(field.ball.get_pos(), field.enemies[0].get_pos(), 500)
+             
+        vecBallRobot2 = aux.point_on_line(field.ball.get_pos(), field.enemies[0].get_pos(), -500)
 
-        actions[self.idx] = Actions.GoToPointIgnore(vecBallRobot2, angel)
+        actions[self.idx] = Actions.GoToPoint(vecBallRobot2, angel)
 
         
