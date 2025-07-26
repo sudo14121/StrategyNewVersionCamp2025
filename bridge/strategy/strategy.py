@@ -143,20 +143,22 @@ class Strategy:
             if aux.dist(field.allies[idx].get_pos(), aux.rotate(vect2, 90 + 2/3 * 3.14 + 270) + field.allies[0].get_pos()) < 150:
                 self.pointNum = 1   
         """
-        angel = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
-        if self.pointNum == 1:
-            actions[self.idx] = Actions.GoToPointIgnore(field.ball.get_pos(), angel)
-            distBall = aux.dist(field.ball.get_pos(), field.allies[self.idx].get_pos())
-            if distBall < 150:
-                self.pointNum = 2
-        elif self.pointNum == 2:
-            goalPointMy = field.ally_goal.hull
-            goalPoint = field.enemy_goal.hull
-            gg = aux.nearest_point_on_poly(field.allies[self.idx].get_pos(), goalPointMy)
-            gg2 = aux.nearest_point_on_poly(field.allies[self.idx].get_pos(), goalPoint)
-            if aux.dist(field.allies[self.idx].get_pos(), gg) < aux.dist(field.allies[self.idx].get_pos(), gg2):
-                gg2 = gg
-            actions[self.idx] = Actions.GoToPointIgnore(gg2, angel)
-            distGoal = aux.dist(gg2, field.allies[self.idx].get_pos())
-            if distGoal < 150:
+        match self.pointNum:
+            case 1:
+                x = field.ball.get_pos()
+                distNeed = aux.dist(field.ball.get_pos(), field.allies[self.idx].get_pos())
+            case 2:
+                goalPointMy = field.ally_goal.hull
+                goalPoint = field.enemy_goal.hull
+                gg = aux.nearest_point_on_poly(field.allies[self.idx].get_pos(), goalPointMy)
+                gg2 = aux.nearest_point_on_poly(field.allies[self.idx].get_pos(), goalPoint)
+                if aux.dist(field.allies[self.idx].get_pos(), gg) < aux.dist(field.allies[self.idx].get_pos(), gg2):
+                    gg2 = gg
+                x = gg2
+                distNeed = aux.dist(gg2, field.allies[self.idx].get_pos())
+        if distNeed < 150:
+            self.pointNum += 1
+            if self.pointNum >= 3:
                 self.pointNum = 1
+        angel = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
+        actions[self.idx] = Actions.GoToPointIgnore(x, angel)
