@@ -20,6 +20,7 @@ class Strategy:
         self.we_active = False
         self.pointNum = 1
         self.idx = 1
+        self.robotin = 1
 
     def process(self, field: fld.Field) -> list[Optional[Action]]:
         """Game State Management"""
@@ -143,6 +144,7 @@ class Strategy:
         angelBlue0 = field.enemies[0].get_angle()
         angelYel0 = field.allies[0].get_angle()
         angelYel4 = field.allies[4].get_angle()
+        angelYel5 = field.allies[5].get_angle()
 
         vecBT = aux.Point(5000, 0)
         vecYT = aux.Point(5000, 0)
@@ -163,9 +165,17 @@ class Strategy:
             print("Нет пересечений")
         else:
             mediana = (pointinter1 + pointinter2 + pointinter3) / 3 
-             
-        vecBallRobot2 = aux.point_on_line(field.ball.get_pos(), field.enemies[0].get_pos(), -500)
-
-        actions[self.idx] = Actions.GoToPoint(vecBallRobot2, angel)
-
         
+        if abs(aux.angle_to_point(field.enemies[0].get_pos(), field.allies[0].get_pos()) - field.enemies[0].get_angle()) <= abs(aux.angle_to_point(field.enemies[0].get_pos(), field.allies[5].get_pos()) - field.enemies[0].get_angle()):
+            vecBallRobot2 = aux.point_on_line(field.allies[0].get_pos(), field.enemies[0].get_pos(), 500)
+        else:
+            vecBallRobot2 = aux.point_on_line(field.allies[5].get_pos(), field.enemies[0].get_pos(), 500)
+
+        match self.robotin:
+            case 1:
+                actions[self.idx] = Actions.GoToPoint(vecBallRobot2, angel)
+            case 2:
+                actions[self.idx] = Actions.GoToPoint(aux.Point(0, 0), angel)
+                
+        if not aux.is_point_inside_poly(field.allies[self.idx].get_pos(), field.hull):
+            self.robotin = 2
