@@ -152,9 +152,9 @@ class Strategy:
         elif self.pointNum == 2:
             goalPointMy = field.ally_goal.hull
             goalPoint = field.enemy_goal.hull
-            gg = aux.nearest_point_on_poly(field.allies[self.idx], goalPointMy)
-            gg2 = aux.nearest_point_on_poly(field.allies[self.idx], goalPoint)
-            if aux.dist(field.allies[self.idx], gg) < aux.dist(field.allies[self.idx], gg2):
+            gg = aux.nearest_point_on_poly(field.allies[self.idx].get_pos(), goalPointMy)
+            gg2 = aux.nearest_point_on_poly(field.allies[self.idx].get_pos(), goalPoint)
+            if aux.dist(field.allies[self.idx].get_pos(), gg) < aux.dist(field.allies[self.idx].get_pos(), gg2):
                 gg2 = gg
             actions[self.idx] = Actions.GoToPointIgnore(gg2, angel)
             distGoal = aux.dist(gg2, field.allies[self.idx].get_pos())
