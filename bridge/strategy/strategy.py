@@ -165,6 +165,8 @@ class Strategy:
             mediana = (pointinter1 + pointinter2 + pointinter3) / 3 
             
         
-        actions[self.idx] = Actions.GoToPointIgnore(mediana, angel)
+        vecBallRobot2 = aux.point_on_line(field.ball.get_pos(), field.enemies[0].get_pos(), 500)
+
+        actions[self.idx] = Actions.GoToPointIgnore(vecBallRobot2, angel)
 
         
