@@ -61,29 +61,6 @@ class Strategy:
 
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         """
-        ONE ITERATION of strategy
-        NOTE: robots will not start acting until this function returns an array of actions,
-              if an action is overwritten during the process, only the last one will be executed)
-
-        Examples of getting coordinates:
-        - field.allies[8].get_pos(): aux.Point -   coordinates  of the 8th  robot from the allies
-        - field.enemies[14].get_angle(): float - rotation angle of the 14th robot from the opponents
-
-        - field.ally_goal.center: Point - center of the ally goal
-        - field.enemy_goal.hull: list[Point] - polygon around the enemy goal area
-
-
-        Examples of robot control:
-        - actions[2] = Actions.GoToPoint(aux.Point(1000, 500), math.pi / 2)
-                The robot number 2 will go to the point (1000, 500), looking in the direction π/2 (up, along the OY axis)
-
-        - actions[3] = Actions.Kick(field.enemy_goal.center)
-                The robot number 3 will hit the ball to 'field.enemy_goal.center' (to the center of the enemy goal)
-
-        - actions[9] = Actions.BallGrab(0.0)
-                The robot number 9 grabs the ball at an angle of 0.0 (it looks to the right, along the OX axis)
-        """
-        """
         sigma = aux.get_line_intersection(field.allies[0].get_pos(), field.allies[1].get_pos(), field.enemies[0].get_pos(), field.ball.get_pos(), "LL")
         print(sigma)
         """
@@ -161,16 +138,33 @@ class Strategy:
             if self.pointNum >= 3:
                 self.pointNum = 1
         angel = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
-        actions[self.idx] = Actions.GoToPointIgnore(x, angel)
+        #actions[self.idx] = Actions.GoToPointIgnore(x, angel)
 
         angelBlue0 = field.enemies[0].get_angle()
         angelYel0 = field.allies[0].get_angle()
+        angelYel4 = field.allies[4].get_angle()
 
-        vecB0 = field.enemies[0].get_pos().unity()
-        vecB0 = aux.rotate(vecB0, angelBlue0)
+        vecBT = aux.Point(5000, 0)
+        vecYT = aux.Point(5000, 0)
+        vecYTT = aux.Point(5000, 0)
 
-        vecY0 = field.allies[0].get_pos().unity()
-        vecY0 = aux.rotate(vecB0, angelYel0)
+        vecB0 = aux.rotate(vecBT, angelBlue0)
 
-        pointinter = aux.get_line_intersection(vecB0, vecB0 * 500, vecY0, vecY0 * 500, "LL")
-        print(pointinter)
+        vecY0 = aux.rotate(vecYT, angelYel0)
+
+        vecY4 = aux.rotate(vecYTT, angelYel4)
+
+        pointinter1 = aux.get_line_intersection(vecB0.unity() + field.enemies[0].get_pos(), vecB0.unity()  * 2 + field.enemies[0].get_pos(), vecY0.unity() + field.allies[0].get_pos(), vecY0.unity() * 2 + field.allies[0].get_pos(), "LL")
+        pointinter2 = aux.get_line_intersection(vecB0.unity() + field.enemies[0].get_pos(), vecB0.unity()  * 2 + field.enemies[0].get_pos(), vecY4.unity() + field.allies[4].get_pos(), vecY4.unity() * 2 + field.allies[4].get_pos(), "LL")
+        pointinter3 = aux.get_line_intersection(vecY4.unity() + field.allies[4].get_pos(), vecY4.unity()  * 2 + field.allies[4].get_pos(), vecY0.unity() + field.allies[0].get_pos(), vecY0.unity() * 2 + field.allies[0].get_pos(), "LL")
+        
+
+        if pointinter1 is None or pointinter2 is None or pointinter3 is None:
+            print("Нет пересечений")
+        else:
+            mediana = (pointinter1 + pointinter2 + pointinter3) / 3 
+            
+        
+        actions[self.idx] = Actions.GoToPointIgnore(mediana, angel)
+
+        
