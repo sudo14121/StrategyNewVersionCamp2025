@@ -102,3 +102,6 @@ class Strategy:
         go = go / 7 * 2.5
         idxGo = aux.point_on_line(field.allies[0].get_pos(), field.enemies[0].get_pos(), go)
         actions[idx] = Actions.GoToPointIgnore(idxGo, angel)"""
+        idx = 1
+        if self.pointNum == 1:
+            actions[idx] = Actions.GoToPointIgnore(field.ally_goal.center_up(), 0)
