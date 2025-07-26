@@ -167,15 +167,18 @@ class Strategy:
             mediana = (pointinter1 + pointinter2 + pointinter3) / 3 
         
         if abs(aux.angle_to_point(field.enemies[0].get_pos(), field.allies[0].get_pos()) - field.enemies[0].get_angle()) <= abs(aux.angle_to_point(field.enemies[0].get_pos(), field.allies[5].get_pos()) - field.enemies[0].get_angle()):
-            vecBallRobot2 = aux.point_on_line(field.allies[0].get_pos(), field.enemies[0].get_pos(), 500)
+            vecBallRobot2 = aux.point_on_line(field.allies[0].get_pos(), field.enemies[0].get_pos(), 700)
         else:
-            vecBallRobot2 = aux.point_on_line(field.allies[5].get_pos(), field.enemies[0].get_pos(), 500)
+            vecBallRobot2 = aux.point_on_line(field.allies[5].get_pos(), field.enemies[0].get_pos(), 700)
 
         match self.robotin:
             case 1:
                 actions[self.idx] = Actions.GoToPoint(vecBallRobot2, angel)
             case 2:
                 actions[self.idx] = Actions.GoToPoint(aux.Point(0, 0), angel)
-                
+                if aux.dist(field.allies[self.idx].get_pos(), aux.Point(0, 0)) < 50:
+                    self.robotin = 1
+
         if not aux.is_point_inside_poly(field.allies[self.idx].get_pos(), field.hull):
             self.robotin = 2
+
