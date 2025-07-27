@@ -65,7 +65,7 @@ class Strategy:
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
        
         angel = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
-
+        """
         vecBallRobot2 = -field.allies[self.idx].get_pos() + field.ball.get_pos()
 
         match self.robotin:
@@ -79,9 +79,9 @@ class Strategy:
                         else:
                             self.vector = aux.rotate(vecBallRobot2, -1/2 * 3.14)
                         self.robotin = 2
-                        self.tochka = (self.vector.unity() * 500) + field.allies[self.idx].get_pos()
+                        self.tochka = (self.vector.unity() * 2000) + field.allies[self.idx].get_pos()
             case 2:
-                actions[self.idx] = Actions.GoToPoint(self.tochka, angel)
+                actions[self.idx] = Actions.GoToPointIgnore(self.tochka, angel)
                 if aux.dist(field.allies[self.idx].get_pos(), self.tochka) < 50:
                     self.robotin = 1
             case 3:
@@ -91,5 +91,18 @@ class Strategy:
 
         if not aux.is_point_inside_poly(field.allies[self.idx].get_pos(), field.hull):
             self.robotin = 3
+        
+"""
 
-
+        angleD = abs(aux.get_angle_between_points(field.enemies[1].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.down))
+        angleU = abs(aux.get_angle_between_points(field.enemies[1].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.up))
+       
+        if angleD > angleU:
+            print(angleD)
+            field.strategy_image.draw_line(field.allies[self.idx].get_pos(), field.enemy_goal.down)
+            actions[self.idx] = Actions.Kick(field.enemy_goal.down + (field.enemy_goal.eye_up * 100))
+        else:
+            print(angleU)
+            field.strategy_image.draw_line(field.allies[self.idx].get_pos(), field.enemy_goal.up)
+            actions[self.idx] = Actions.Kick(field.enemy_goal.up +  (field.enemy_goal.eye_up * -100))
+           
