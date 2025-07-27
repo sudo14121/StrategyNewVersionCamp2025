@@ -59,7 +59,7 @@ class Strategy:
 
         return actions
 
-    def choose_point_to_goal(self, field: fld.Field, actions: list[Action]) -> None:
+    def choose_point_to_goal(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         angleD = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.down))
         angleU = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.up))
         
@@ -72,12 +72,10 @@ class Strategy:
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
        
         angel = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
-       
-        self.goalkeeper.ball5cadrs(field, actions)
 
         if field.ally_color == const.Color.YELLOW:
             self.choose_point_to_goal(field, actions)
         else:
-            self.goalkeeper.keep(field, actions)
+            self.goalkeeper.rungoal(field, actions)
            
     
