@@ -1,4 +1,4 @@
-playColor = "yellow" #"blue"
+playColor = "blue" #"blue"
 """
 Определение необходимых констант
 """
