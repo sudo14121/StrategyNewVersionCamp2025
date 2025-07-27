@@ -9,7 +9,7 @@ from bridge import const
 from bridge.auxiliary import aux, fld, rbt  # type: ignore
 from bridge.const import State as GameStates
 from bridge.router.base_actions import Action, Actions, KickActions  # type: ignore
-
+from bridge.strategy.golkeeper import Goalkeeper
 
 class Strategy:
     """Main class of strategy"""
@@ -18,12 +18,8 @@ class Strategy:
         self,
     ) -> None:
         self.we_active = False
-        self.pointNum = 1
+        self.goalkeeper = Goalkeeper()
         self.idx = 0
-        self.robotin = 1
-        self.vector = aux.Point(0, 0)
-        self.tochka = aux.Point(0, 0)
-        self.ballMem = [aux.Point(0, 0) * 5]
 
     def process(self, field: fld.Field) -> list[Optional[Action]]:
         """Game State Management"""
@@ -72,25 +68,16 @@ class Strategy:
         else:
             go = field.enemy_goal.up + (field.enemy_goal.eye_up * -100)
         actions[self.idx] = Actions.Kick(go)
-    
-    def goolkeeper(self, field: fld.Field, actions: list[Action]):
-        angelB = (field.ball.get_pos() - field.allies[const.GK].get_pos()).arg()
-        vecBallRobot2 = aux.get_line_intersection(field.enemies[self.idx].get_pos(), field.ball.get_pos(), (field.ally_goal.down + field.ally_goal.frw_down) / 2, (field.ally_goal.up + field.ally_goal.frw_up) / 2, "RS")
-        field.strategy_image.draw_line(field.ball.get_pos(), field.enemies[self.idx].get_pos(), color=(255, 0, 0))
-        field.strategy_image.draw_line(field.ally_goal.center_down, field.ally_goal.center_up, color=(0, 0, 255))
 
-        if vecBallRobot2 is None:
-            vecBallRobot2 = (field.ally_goal.center + field.ally_goal.frw) / 2 
-            
-        actions[const.GK] = Actions.GoToPoint(vecBallRobot2, angelB)
-        
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
        
         angel = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
        
-        print(field.ally_color)
+        self.goalkeeper.ball5cadrs(field, actions)
+
         if field.ally_color == const.Color.YELLOW:
             self.choose_point_to_goal(field, actions)
         else:
-            self.goolkeeper(field, actions)
+            self.goalkeeper.keep(field, actions)
            
+    
