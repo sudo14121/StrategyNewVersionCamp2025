@@ -19,10 +19,11 @@ class Strategy:
     ) -> None:
         self.we_active = False
         self.pointNum = 1
-        self.idx = 1
+        self.idx = 0
         self.robotin = 1
         self.vector = aux.Point(0, 0)
         self.tochka = aux.Point(0, 0)
+        self.ballMem = [aux.Point(0, 0) * 5]
 
     def process(self, field: fld.Field) -> list[Optional[Action]]:
         """Game State Management"""
@@ -62,47 +63,34 @@ class Strategy:
 
         return actions
 
+    def choose_point_to_goal(self, field: fld.Field, actions: list[Action]) -> None:
+        angleD = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.down))
+        angleU = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.up))
+        
+        if angleD > angleU:
+            go = field.enemy_goal.down + (field.enemy_goal.eye_up * 100)
+        else:
+            go = field.enemy_goal.up + (field.enemy_goal.eye_up * -100)
+        actions[self.idx] = Actions.Kick(go)
+    
+    def goolkeeper(self, field: fld.Field, actions: list[Action]):
+        angelB = (field.ball.get_pos() - field.allies[const.GK].get_pos()).arg()
+        vecBallRobot2 = aux.get_line_intersection(field.enemies[self.idx].get_pos(), field.ball.get_pos(), (field.ally_goal.down + field.ally_goal.frw_down) / 2, (field.ally_goal.up + field.ally_goal.frw_up) / 2, "RS")
+        field.strategy_image.draw_line(field.ball.get_pos(), field.enemies[self.idx].get_pos(), color=(255, 0, 0))
+        field.strategy_image.draw_line(field.ally_goal.center_down, field.ally_goal.center_up, color=(0, 0, 255))
+
+        if vecBallRobot2 is None:
+            vecBallRobot2 = (field.ally_goal.center + field.ally_goal.frw) / 2 
+            
+        actions[const.GK] = Actions.GoToPoint(vecBallRobot2, angelB)
+        
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
        
         angel = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
-        """
-        vecBallRobot2 = -field.allies[self.idx].get_pos() + field.ball.get_pos()
-
-        match self.robotin:
-            case 1:
-                for i in range(6):
-                    if aux.line_circle_intersect(field.ball.get_pos(), field.allies[self.idx].get_pos(), field.enemies[i].get_pos(), 100, "S"):
-                        vectRobot = aux.get_angle_between_points(field.enemies[i].get_pos(), field.ball.get_pos(), field.allies[self.idx].get_pos())
-                        if vectRobot > 0:
-                            print(1)
-                            self.vector = aux.rotate(vecBallRobot2, 1/2 * 3.14)
-                        else:
-                            self.vector = aux.rotate(vecBallRobot2, -1/2 * 3.14)
-                        self.robotin = 2
-                        self.tochka = (self.vector.unity() * 2000) + field.allies[self.idx].get_pos()
-            case 2:
-                actions[self.idx] = Actions.GoToPointIgnore(self.tochka, angel)
-                if aux.dist(field.allies[self.idx].get_pos(), self.tochka) < 50:
-                    self.robotin = 1
-            case 3:
-                actions[self.idx] = Actions.GoToPointIgnore(aux.Point(0, 0), angel)
-                if aux.dist(field.allies[self.idx].get_pos(), aux.Point(0, 0)) < 50:
-                    self.robotin = 1
-
-        if not aux.is_point_inside_poly(field.allies[self.idx].get_pos(), field.hull):
-            self.robotin = 3
-        
-"""
-
-        angleD = abs(aux.get_angle_between_points(field.enemies[1].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.down))
-        angleU = abs(aux.get_angle_between_points(field.enemies[1].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.up))
        
-        if angleD > angleU:
-            print(angleD)
-            field.strategy_image.draw_line(field.allies[self.idx].get_pos(), field.enemy_goal.down)
-            actions[self.idx] = Actions.Kick(field.enemy_goal.down + (field.enemy_goal.eye_up * 100))
+        print(field.ally_color)
+        if field.ally_color == const.Color.YELLOW:
+            self.choose_point_to_goal(field, actions)
         else:
-            print(angleU)
-            field.strategy_image.draw_line(field.allies[self.idx].get_pos(), field.enemy_goal.up)
-            actions[self.idx] = Actions.Kick(field.enemy_goal.up +  (field.enemy_goal.eye_up * -100))
+            self.goolkeeper(field, actions)
            
