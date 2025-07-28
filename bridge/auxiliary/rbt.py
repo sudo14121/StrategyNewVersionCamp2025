@@ -72,7 +72,7 @@ class Robot(entity.Entity):
             gains_full = [1.8, 0.06, 0.0, const.MAX_SPEED]
             gains_soft = gains_full
             a_gains_full = [8, 0.1, 0.1, const.MAX_SPEED_R]
-            
+
         a_gains_soft = a_gains_full
 
         self.pos_reg_x = tau.PISD(
@@ -148,17 +148,17 @@ class Robot(entity.Entity):
         if self.live_time_ is None:
             self.live_time_ = t
 
-    def update_(self, new_entity: "Robot") -> None:
+    def update_(self, lite_robot: "LiteRobot") -> None:
         """
         Обновить состояние робота используя готовые данные
         """
-        self._pos = new_entity.get_pos()
-        self._vel = new_entity.get_vel()
-        self._angle = new_entity.get_angle()
-        self._anglevel = new_entity.get_anglevel()
+        self._pos = lite_robot.pos
+        self._vel = lite_robot.vel
+        self._angle = lite_robot.angle
+        self._anglevel = lite_robot.anglevel
 
-        self._is_used = new_entity.is_used()
-        self.last_update_ = new_entity.last_update()
+        self._is_used = lite_robot.is_used
+        self.last_update_ = lite_robot.is_used
 
     def kick_forward(self) -> None:
         """
@@ -306,3 +306,18 @@ class Robot(entity.Entity):
             + " "
             + str(self.speed_r)
         )
+
+
+class LiteRobot:
+    """Lite class, to moving information about robot between processes"""
+
+    def __init__(self, robot: Robot) -> None:
+        self.r_id = robot.r_id
+
+        self.pos = robot.get_pos()
+        self.vel = robot.get_vel()
+        self.angle = robot.get_angle()
+        self.anglevel = robot.get_anglevel()
+
+        self.is_used = robot.is_used()
+        self.last_update = robot.last_update()

@@ -75,7 +75,7 @@ class CommandSink(BaseProcessor):
 
         new_field = self.field_reader.read_last()
         if new_field is not None:
-            updated_field: fld.Field = new_field.content
+            updated_field: fld.LiteField = new_field.content
             if self.field_b.last_update != updated_field.last_update:
                 self.field_b.update_field(updated_field)
                 self.field_y.update_field(updated_field)

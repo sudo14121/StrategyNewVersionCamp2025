@@ -133,7 +133,7 @@ GRAVEYARD_POS_X = -10000
 
 BALL_MAX_VISION_SPEED = 10000  # for filter random balls
 ROBOT_MAX_VISION_SPEED = 10000  # for filter random robots
-TIME_TO_BORN = 0.5  # time to add robot to field
+TIME_TO_BORN = 0.1  # time to add robot to field
 TIME_TO_DIE = 0.5  # time to remove robot from field
 
 match DIV:
