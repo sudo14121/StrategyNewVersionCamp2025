@@ -11,6 +11,8 @@ from bridge.const import State as GameStates
 from bridge.router.base_actions import Action, Actions, KickActions  # type: ignore
 from bridge.strategy.golkeeper import Goalkeeper
 from bridge.strategy.ronaldo import Ronaldo
+from bridge.strategy.neymar import Neymar
+from bridge.strategy.states import states
 
 class Strategy:
     """Main class of strategy"""
@@ -19,11 +21,11 @@ class Strategy:
         self,
     ) -> None:
         self.we_active = False
-        self.goalkeeper = Goalkeeper()
-        self.idxR = 6
+        self.idxR = 0
         self.idxN = 1
-        self.side = 1 #-1 if blue
         self.ronaldo = Ronaldo(self.idxR)
+        self.states = states(self.idxN, self.idxR)
+        self.goalkeeper = Goalkeeper(self.idxN, self.idxR)
 
     def process(self, field: fld.Field) -> list[Optional[Action]]:
         """Game State Management"""
@@ -48,41 +50,16 @@ class Strategy:
             case GameStates.TIMEOUT:
                 pass
             case GameStates.HALT:
-                actions[self.idxR] = Actions.Stop()
-                actions[self.idxN] = Actions.Stop()
-                actions[field.gk_id] = Actions.Stop()
+                self.states.halt(field, actions)
                 return [None] * const.TEAM_ROBOTS_MAX_COUNT
             case GameStates.PREPARE_PENALTY:
-                ballangel = (field.ball.get_pos() - field.allies[field.gk_id].get_pos()).arg()
-                if not (self.we_active):
-                    actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 500, -250), ballangel)
-                    actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 500, 250), ballangel)
-                else:
-                    actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * 100, 0), ballangel)
-                    actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * 500, 250), ballangel)
-                actions[field.gk_id] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
-                pass
+                self.states.prepare_penalty(field, actions, self.we_active)
             case GameStates.PENALTY:
-                if self.we_active:
-                    self.ronaldo.choose_point_to_goal(field, actions)
-                else:
-                    self.goalkeeper.rungoal(field, actions)
-                
+                self.states.penalty(field, actions, self.we_active)
             case GameStates.PREPARE_KICKOFF:
-                if not self.we_active:
-                    ronaldoxy2 = aux.get_line_intersection(field.ally_goal.frw_down, field.ally_goal.center_down, aux.Point(0, 100), aux.Point(0, 0), "LL")
-                ronaldoxy = aux.get_line_intersection(field.ally_goal.frw_up, field.ally_goal.center_up, aux.Point(0, 100), aux.Point(0, 0), "LL")
-                ballangel1 = (field.ball.get_pos() - field.allies[self.idxR].get_pos()).arg()
-                ballangel2 = (field.ball.get_pos() - field.allies[self.idxN].get_pos()).arg()
-                ballangel = (field.ball.get_pos() - field.allies[field.gk_id].get_pos()).arg()
-
-                actions[self.idxR] = Actions.GoToPoint((ronaldoxy + field.ally_goal.frw_up) / 2, ballangel1) #type:ignore
-                actions[self.idxN] = Actions.GoToPoint((ronaldoxy2 + field.ally_goal.frw_down) / 2, ballangel2) #type:ignore
-
-                actions[field.gk_id] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
-                pass
+                self.states.prepare_kikoff(field, actions, self.we_active)
             case GameStates.KICKOFF:
-                pass
+                self.states.kikoff(field, actions, self.we_active)
             case GameStates.FREE_KICK:
                 pass
             case GameStates.STOP:
@@ -92,9 +69,7 @@ class Strategy:
         return actions
 
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-        if field.ally_color == const.Color.YELLOW:
-            self.ronaldo.choose_point_to_goal(field, actions)
-        else:
-            self.goalkeeper.rungoal(field, actions)
+        #self.ronaldo.choose_point_to_goal(field, actions)
+        self.goalkeeper.rungoal(field, actions)
            
     

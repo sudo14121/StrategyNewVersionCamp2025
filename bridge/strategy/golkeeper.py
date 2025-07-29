@@ -1,3 +1,5 @@
+import math  # type: ignore
+from time import time  # type: ignore
 from typing import Optional
 
 from bridge import const
@@ -10,17 +12,31 @@ voltage_pas = 5
 
 
 class Goalkeeper():
-    def __init__(self) -> None:
+    def __init__(self, idxN: int, idxR: int) -> None:
 
         # Индексы моих роботов
         self.gk_idx = const.GK
-        self.idx1 = 0   
-        self.idx2 =  2 
+        self.idx1 = idxR
+        self.idx2=  idxN
     
         # Индексы роботов соперника
         self.gk_idx_enem = 1
         self.idx_enem1 = 0
         self.idx_enem2 = 2
+
+    
+
+    def opening_to_the_ball(self, field: fld.Field, actions: list[Optional[Action]], goal_position_gates: aux.Point) -> None:
+        k = 250
+        go = field.ally_goal.up - (field.ally_goal.eye_up * k)
+        for idx_enemy in [robot.r_id for robot in field.active_enemies()]:
+            if(aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idx2].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) > 100):
+                actions[self.gk_idx] = Actions.Kick(field.allies[self.idx2].get_pos())  
+            elif(aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idx1].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) > 100):
+                actions[self.gk_idx] = Actions.Kick(field.allies[self.idx1].get_pos())         
+            else:
+                actions[self.gk_idx] = Actions.Kick(goal_position_gates, voltage_kik, is_upper=True)
+            
 
     def rungoal(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         
@@ -61,11 +77,9 @@ class Goalkeeper():
 
         angle_goalkeeper = (ball - robot_pos_GK).arg()
     
-        actions[self.gk_idx] = Actions.GoToPoint(goal_position, angle_goal_ball)
+        actions[self.gk_idx] = Actions.GoToPoint(goal_position, angle_goalkeeper)
 
-    
         if field.is_ball_stop_near_goal():
             actions[self.gk_idx] = Actions.Kick(goal_position_gates, voltage_kik, is_upper=True)
-    
         if field.is_ball_in(field.allies[self.gk_idx]):
-            actions[self.gk_idx] = Actions.Kick(goal_position_gates, voltage_kik, is_upper=True)
+            self.opening_to_the_ball(field, actions, goal_position_gates)
