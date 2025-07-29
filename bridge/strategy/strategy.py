@@ -20,10 +20,10 @@ class Strategy:
     ) -> None:
         self.we_active = False
         self.goalkeeper = Goalkeeper()
-        self.ronaldo = Ronaldo()
-        self.idxR = 0
-        self.idxN = 0
+        self.idxR = 6
+        self.idxN = 1
         self.side = 1 #-1 if blue
+        self.ronaldo = Ronaldo(self.idxR)
 
     def process(self, field: fld.Field) -> list[Optional[Action]]:
         """Game State Management"""
@@ -40,6 +40,8 @@ class Strategy:
         if field.ally_color == const.COLOR:
             text = str(field.game_state) + "  we_active:" + str(self.we_active)
             field.strategy_image.print(aux.Point(600, 780), text, need_to_scale=False)
+            #print(text)
+            
         match field.game_state:
             case GameStates.RUN:
                 self.run(field, actions)
@@ -48,29 +50,36 @@ class Strategy:
             case GameStates.HALT:
                 actions[self.idxR] = Actions.Stop()
                 actions[self.idxN] = Actions.Stop()
-                actions[const.GK] = Actions.Stop()
+                actions[field.gk_id] = Actions.Stop()
                 return [None] * const.TEAM_ROBOTS_MAX_COUNT
             case GameStates.PREPARE_PENALTY:
-                ballangel = (field.ball.get_pos() - field.allies[const.GK].get_pos()).arg()
+                ballangel = (field.ball.get_pos() - field.allies[field.gk_id].get_pos()).arg()
                 if not (self.we_active):
                     actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 500, -250), ballangel)
                     actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 500, 250), ballangel)
                 else:
                     actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * 100, 0), ballangel)
                     actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * 500, 250), ballangel)
-                actions[const.GK] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
+                actions[field.gk_id] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
                 pass
             case GameStates.PENALTY:
                 if self.we_active:
-                    self.ronaldo.penalty(field, actions)
+                    self.ronaldo.choose_point_to_goal(field, actions)
                 else:
                     self.goalkeeper.rungoal(field, actions)
-                pass
+                
             case GameStates.PREPARE_KICKOFF:
-                ronaldoxyi = field.ally_goal.frw_up
-                actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * 100, 0), ballangel)
-                actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * 500, 250), ballangel)
-                actions[const.GK] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
+                if not self.we_active:
+                    ronaldoxy2 = aux.get_line_intersection(field.ally_goal.frw_down, field.ally_goal.center_down, aux.Point(0, 100), aux.Point(0, 0), "LL")
+                ronaldoxy = aux.get_line_intersection(field.ally_goal.frw_up, field.ally_goal.center_up, aux.Point(0, 100), aux.Point(0, 0), "LL")
+                ballangel1 = (field.ball.get_pos() - field.allies[self.idxR].get_pos()).arg()
+                ballangel2 = (field.ball.get_pos() - field.allies[self.idxN].get_pos()).arg()
+                ballangel = (field.ball.get_pos() - field.allies[field.gk_id].get_pos()).arg()
+
+                actions[self.idxR] = Actions.GoToPoint((ronaldoxy + field.ally_goal.frw_up) / 2, ballangel1) #type:ignore
+                actions[self.idxN] = Actions.GoToPoint((ronaldoxy2 + field.ally_goal.frw_down) / 2, ballangel2) #type:ignore
+
+                actions[field.gk_id] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
                 pass
             case GameStates.KICKOFF:
                 pass
@@ -79,7 +88,7 @@ class Strategy:
             case GameStates.STOP:
                 # The router will automatically prevent robots from getting too close to the ball
                 self.run(field, actions)
-
+        #print(actions[self.idxR])
         return actions
 
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:

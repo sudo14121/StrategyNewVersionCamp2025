@@ -5,8 +5,8 @@ from bridge.auxiliary import aux, fld, rbt  # type: ignore
 from bridge.const import State as GameStates
 from bridge.router.base_actions import Action, Actions, KickActions 
 
-voltage_kik = 15
-voltage_pas = 4
+voltage_kik = 7
+voltage_pas = 5
 
 
 class Goalkeeper():
@@ -35,8 +35,8 @@ class Goalkeeper():
         ball = field.ball.get_pos()
 
 
-        g_up_xy_goal = field.enemy_goal.up - field.enemy_goal.eye_up * 65    
-        g_down_xy_goal = field.enemy_goal.down + field.enemy_goal.eye_up * 65 
+        g_up_xy_goal = field.enemy_goal.up - field.enemy_goal.eye_up * 80    
+        g_down_xy_goal = field.enemy_goal.down + field.enemy_goal.eye_up * 80 
 
         up_goal = (g_up_xy_goal - robot_pos_GK_enem).mag()
         down_goal = (robot_pos_GK_enem + g_down_xy_goal).mag()

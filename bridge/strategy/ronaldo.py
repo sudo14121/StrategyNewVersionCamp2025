@@ -6,8 +6,8 @@ from bridge.const import State as GameStates
 from bridge.router.base_actions import Action, Actions, KickActions 
 
 class Ronaldo():
-    def __init__(self) -> None:
-        self.idx = 0
+    def __init__(self, idx1R: int) -> None:
+        self.idx = idx1R
         self.ballMem = [aux.Point(0, 0)] * 5
         
     def choose_point_to_goal(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
@@ -19,6 +19,7 @@ class Ronaldo():
         else:
             go = field.enemy_goal.up - (field.enemy_goal.eye_up * k)
         actions[self.idx] = Actions.Kick(go)
+        print(actions[self.idx])
 
     def penalty(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         k = 90
