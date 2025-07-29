@@ -10,6 +10,7 @@ from bridge.auxiliary import aux, fld, rbt  # type: ignore
 from bridge.const import State as GameStates
 from bridge.router.base_actions import Action, Actions, KickActions  # type: ignore
 from bridge.strategy.golkeeper import Goalkeeper
+from bridge.strategy.ronaldo import Ronaldo
 
 class Strategy:
     """Main class of strategy"""
@@ -19,7 +20,10 @@ class Strategy:
     ) -> None:
         self.we_active = False
         self.goalkeeper = Goalkeeper()
-        self.idx = 0
+        self.ronaldo = Ronaldo()
+        self.idxR = 0
+        self.idxN = 0
+        self.side = 1 #-1 if blue
 
     def process(self, field: fld.Field) -> list[Optional[Action]]:
         """Game State Management"""
@@ -42,12 +46,31 @@ class Strategy:
             case GameStates.TIMEOUT:
                 pass
             case GameStates.HALT:
+                actions[self.idxR] = Actions.Stop()
+                actions[self.idxN] = Actions.Stop()
+                actions[const.GK] = Actions.Stop()
                 return [None] * const.TEAM_ROBOTS_MAX_COUNT
             case GameStates.PREPARE_PENALTY:
+                ballangel = (field.ball.get_pos() - field.allies[const.GK].get_pos()).arg()
+                if not (self.we_active):
+                    actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 500, -250), ballangel)
+                    actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 500, 250), ballangel)
+                else:
+                    actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * 100, 0), ballangel)
+                    actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * 500, 250), ballangel)
+                actions[const.GK] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
                 pass
             case GameStates.PENALTY:
+                if self.we_active:
+                    self.ronaldo.penalty(field, actions)
+                else:
+                    self.goalkeeper.rungoal(field, actions)
                 pass
             case GameStates.PREPARE_KICKOFF:
+                ronaldoxyi = field.ally_goal.frw_up
+                actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * 100, 0), ballangel)
+                actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * 500, 250), ballangel)
+                actions[const.GK] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
                 pass
             case GameStates.KICKOFF:
                 pass
@@ -59,22 +82,9 @@ class Strategy:
 
         return actions
 
-    def choose_point_to_goal(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-        angleD = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.down))
-        angleU = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.up))
-        
-        if angleD > angleU:
-            go = field.enemy_goal.down + (field.enemy_goal.eye_up * 100)
-        else:
-            go = field.enemy_goal.up + (field.enemy_goal.eye_up * -100)
-        actions[self.idx] = Actions.Kick(go)
-
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-       
-        angel = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
-
         if field.ally_color == const.Color.YELLOW:
-            self.choose_point_to_goal(field, actions)
+            self.ronaldo.choose_point_to_goal(field, actions)
         else:
             self.goalkeeper.rungoal(field, actions)
            
