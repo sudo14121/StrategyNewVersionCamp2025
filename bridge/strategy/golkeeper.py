@@ -10,15 +10,15 @@ voltage_pas = 5
 
 
 class Goalkeeper():
-    def __init__(self, idxN: int, idxR: int, idxE1: int, idxE2: int) -> None:
+    def __init__(self, idxN: int, idxR: int, idxE1: int, idxE2: int, idxG: int, idxEG: int) -> None:
 
         # Индексы моих роботов
-        self.gk_idx = const.GK
+        self.gk_idx = idxG
         self.idx1 = idxN   
         self.idx2 =  idxR
     
         # Индексы роботов соперника
-        self.gk_idx_enem = const.ENEMY_GK
+        self.gk_idx_enem = idxEG
         self.idx_enem1 = idxE1
         self.idx_enem2 = idxE2
 
@@ -36,8 +36,8 @@ class Goalkeeper():
         ball = field.ball.get_pos()
 
 
-        g_up_xy_goal = field.enemy_goal.up - field.enemy_goal.eye_up * 70    
-        g_down_xy_goal = field.enemy_goal.down + field.enemy_goal.eye_up * 70
+        g_up_xy_goal = field.enemy_goal.up #- field.enemy_goal.eye_up * 50    
+        g_down_xy_goal = field.enemy_goal.down #+ field.enemy_goal.eye_up * 50
 
         up_goal = (g_up_xy_goal - robot_pos_gk_enem).mag()
         down_goal = (robot_pos_gk_enem + g_down_xy_goal).mag()
@@ -61,11 +61,14 @@ class Goalkeeper():
             goal_position = field.ally_goal.center
 
         angle_goalkeeper = (ball - robot_pos_gk).arg()
-    
+        
+        if (aux.Point(0, 0) - goal_position).mag() > (aux.Point(0, 0) - field.ally_goal.center).mag():
+            goal_position = field.ally_goal.center
+        
         actions[self.gk_idx] = Actions.GoToPoint(goal_position, angle_goal_ball)
 
     
-        if field.is_ball_stop_near_goal():
+        if aux.is_point_inside_poly(field.ball.get_pos(), field.ally_goal.hull):
             actions[self.gk_idx] = Actions.Kick(goal_position_gates, voltage_kik, is_upper=True)
 
     

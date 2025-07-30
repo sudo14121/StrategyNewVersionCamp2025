@@ -16,7 +16,7 @@ class Ronaldo():
     def choose_point_to_goal(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         angleD = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.down))
         angleU = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.up))
-        k = 100
+        k = 80
         if angleD > angleU:
             go = field.enemy_goal.down + (field.enemy_goal.eye_up * k)
         else:

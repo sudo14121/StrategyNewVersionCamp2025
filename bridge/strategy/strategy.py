@@ -18,17 +18,17 @@ class Strategy:
     """Main class of strategy"""
 
     def __init__(
-        self,
+        self, field: fld.Field
     ) -> None:
         self.we_active = False
-        self.idxR = 3
-        self.idxN = 6
-        self.idxE1 = 1
-        self.idxE2 = 0
+        self.idxR = 6
+        self.idxN = 3
+        self.idxE1 = 7
+        self.idxE2 = 2
         self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
         self.neymar = Neymar(self.idxR, self.idxN, self.idxE1, self.idxE2)
-        self.states = states(self.idxN, self.idxR, self.idxE1, self.idxE2)
-        self.goalkeeper = Goalkeeper(self.idxN, self.idxR, self.idxE1, self.idxE2)
+        self.states = states(self.idxN, self.idxR, self.idxE1, self.idxE2, field.gk_id, field.enemy_gk_id)
+        self.goalkeeper = Goalkeeper(self.idxN, self.idxR, self.idxE1, self.idxE2, field.gk_id, field.enemy_gk_id)
 
     def process(self, field: fld.Field) -> list[Optional[Action]]:
         """Game State Management"""
@@ -72,8 +72,10 @@ class Strategy:
         return actions
 
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-        #self.ronaldo.run(field, actions)
-        #self.neymar.run(field, actions)
+        self.ronaldo.run(field, actions)
+        self.neymar.run(field, actions)
         self.goalkeeper.rungoal(field, actions)
+        '''if field.ally_color == const.Color.YELLOW:
+            actions[field.gk_id] = Actions.Kick(aux.Point(0, 0))'''
            
     

@@ -55,7 +55,7 @@ class SSLController(BaseProcessor):
         self.field = fld.Field(self.ally_color)
         self.field.strategy_image.timer = drawing.FeedbackTimer(time(), 0.05, 40)
 
-        self.strategy = strategy.Strategy()
+        self.strategy = strategy.Strategy(self.field)
         self.actions: list[Optional[Action]] = []
 
     def read_vision(self) -> None:
