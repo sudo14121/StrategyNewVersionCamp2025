@@ -9,12 +9,14 @@ from bridge.strategy.ronaldo import Ronaldo
 from bridge.strategy.neymar import Neymar
 
 class states():
-    def __init__(self, idx1N: int, idx1R: int) -> None:
+    def __init__(self, idx1N: int, idx1R: int, idxE1: int, idxE2: int) -> None:
         self.idxN = idx1N
         self.idxR = idx1R
         self.ballMem = [aux.Point(0, 0)] * 5
         self.goalkeeper = Goalkeeper(self.idxN, self.idxR)
-        self.ronaldo = Ronaldo(self.idxR)
+        self.idxE1 = idxE1
+        self.idxE2 = idxE2
+        self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
 
 
     def halt(self, field: fld.Field, actions: list[Optional[Action]]) -> None:

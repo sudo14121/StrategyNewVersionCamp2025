@@ -22,9 +22,11 @@ class Strategy:
     ) -> None:
         self.we_active = False
         self.idxR = 0
-        self.idxN = 1
-        self.ronaldo = Ronaldo(self.idxR)
-        self.states = states(self.idxN, self.idxR)
+        self.idxN = 2
+        self.idxE1 = 0
+        self.idxE2 = 2
+        self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
+        self.states = states(self.idxN, self.idxR, self.idxE1, self.idxE2)
         self.goalkeeper = Goalkeeper(self.idxN, self.idxR)
 
     def process(self, field: fld.Field) -> list[Optional[Action]]:
@@ -69,7 +71,7 @@ class Strategy:
         return actions
 
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-        #self.ronaldo.choose_point_to_goal(field, actions)
+        self.ronaldo.run(field, actions)
         self.goalkeeper.rungoal(field, actions)
            
     
