@@ -67,4 +67,32 @@ class Neymar():
 
         return polog_enimes
         
+    def opening_to_the_ball(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
+        y = (field.ball.get_pos() - field.allies[self.idx].get_pos()).unity()*700
+        angl = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
+        for idx_enemy in [robot.r_id for robot in field.active_enemies(False)]:
+            print(idx_enemy)
+            if(aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) < 120):
+                e = aux.get_angle_between_points(field.allies[self.idx].get_pos(), field.ball.get_pos(), field.enemies[idx_enemy].get_pos())
+                if(e>0):
+                    if(aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) < 120):
+                        pointg = aux.nearest_point_on_circle(aux.rotate(y, 3.14/2) + field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), 1000)
+                        actions[self.idx] = Actions.GoToPoint(self.iffiil(field, actions, pointg), angl)
+                        field.strategy_image.draw_circle(self.iffiil(field, actions, pointg))
+                else:
+                    if(aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) < 120):
+                        pointg = aux.nearest_point_on_circle(aux.rotate(y, -3.14/2) + field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), 1000)
+                        actions[self.idx] = Actions.GoToPoint(self.iffiil(field, actions, pointg), angl)
+                        field.strategy_image.draw_circle(self.iffiil(field, actions, pointg))
+            
+        
+        #actions[self.idx] = Actions.GoToPoint(field.allies[self.idx].get_pos(), angl)
+
+    def iffiil(self, field: fld.Field, actions: list[Optional[Action]], p: aux.Point) -> aux.Point:
+        if aux.is_point_inside_poly(p, field.hull) and not aux.is_point_inside_poly(p, field.ally_goal.hull) and not aux.is_point_inside_poly(p, field.enemy_goal.hull):
+            return p
+        else:
+            return aux.nearest_point_in_poly(p, field.hull)
     
+    def passs(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
+        pass

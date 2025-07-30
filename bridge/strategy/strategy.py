@@ -21,10 +21,10 @@ class Strategy:
         self,
     ) -> None:
         self.we_active = False
-        self.idxR = 0
-        self.idxN = 2
-        self.idxE1 = 0
-        self.idxE2 = 2
+        self.idxR = 3
+        self.idxN = 6
+        self.idxE1 = 1
+        self.idxE2 = 0
         self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
         self.neymar = Neymar(self.idxR, self.idxN, self.idxE1, self.idxE2)
         self.states = states(self.idxN, self.idxR, self.idxE1, self.idxE2)
@@ -72,8 +72,8 @@ class Strategy:
         return actions
 
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-        self.ronaldo.opening_to_the_ball(field, actions)
+        #self.ronaldo.run(field, actions)
         #self.neymar.run(field, actions)
-        #self.goalkeeper.rungoal(field, actions)
+        self.goalkeeper.rungoal(field, actions)
            
     

@@ -17,6 +17,7 @@ class states():
         self.idxE2 = idxE2
         self.goalkeeper = Goalkeeper(self.idxN, self.idxR, self.idxE1, self.idxE2)
         self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
+        self.neymar = Neymar(self.idxR, self.idxN, self.idxE1, self.idxE2)
 
 
     def halt(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
@@ -71,5 +72,10 @@ class states():
             pass
 
     def freekick(self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:
-        pass
+        if self.ronaldo.ifiam(field, actions):
+            #self.ronaldo.passs(field, actions)
+            self.neymar.opening_to_the_ball(field, actions)
+        else:
+            #self.neymar.passs(field, actions)
+            self.ronaldo.opening_to_the_ball(field, actions)
     

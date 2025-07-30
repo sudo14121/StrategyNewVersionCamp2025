@@ -1,4 +1,4 @@
-playColor = "blue" #"blue"
+playColor = "yellow" #"blue"
 """
 Определение необходимых констант
 """
@@ -54,13 +54,13 @@ else:
     COLOR = Color.YELLOW
 POLARITY = 1  # -1 если ворота синих на +x; 1 если ворота синих на -x
 
-IS_SIMULATOR_USED = True#False
+IS_SIMULATOR_USED = False#False
 SELF_PLAY = False
 
 DEBUG_HALF = 0  # 1 = +x, -1 = -x, 0 = not debug
 
-GK = 1
-ENEMY_GK = 1
+GK = 5
+ENEMY_GK = 7
 
 ROBOTS_MAX_COUNT: int = 32
 TEAM_ROBOTS_MAX_COUNT: int = ROBOTS_MAX_COUNT // 2
