@@ -10,7 +10,7 @@ voltage_pas = 5
 
 
 class Goalkeeper():
-    def __init__(self, idxN: int, idxR: int) -> None:
+    def __init__(self, idxN: int, idxR: int, idxE1: int, idxE2: int) -> None:
 
         # Индексы моих роботов
         self.gk_idx = const.GK
@@ -18,9 +18,9 @@ class Goalkeeper():
         self.idx2 =  idxR
     
         # Индексы роботов соперника
-        self.gk_idx_enem = 1
-        self.idx_enem1 = 0
-        self.idx_enem2 = 2
+        self.gk_idx_enem = const.ENEMY_GK
+        self.idx_enem1 = idxE1
+        self.idx_enem2 = idxE2
 
     def rungoal(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         
@@ -35,8 +35,8 @@ class Goalkeeper():
         ball = field.ball.get_pos()
 
 
-        g_up_xy_goal = field.enemy_goal.up - field.enemy_goal.eye_up * 80    
-        g_down_xy_goal = field.enemy_goal.down + field.enemy_goal.eye_up * 80 
+        g_up_xy_goal = field.enemy_goal.up - field.enemy_goal.eye_up * 75    
+        g_down_xy_goal = field.enemy_goal.down + field.enemy_goal.eye_up * 75 
 
         up_goal = (g_up_xy_goal - robot_pos_GK_enem).mag()
         down_goal = (robot_pos_GK_enem + g_down_xy_goal).mag()

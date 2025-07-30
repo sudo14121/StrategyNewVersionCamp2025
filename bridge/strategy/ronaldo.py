@@ -57,13 +57,15 @@ class Ronaldo():
     def protect(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         enimes_get = field.enemies[self.idxE1].get_pos()
         enimes_get1 = field.enemies[self.idxE2].get_pos()
+
+        go = (enimes_get + enimes_get1) / 2
         ballangel = (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg()
         if self.enimes_half(field, actions) == 1:
             actions[self.idx] = Actions.GoToPoint((field.ally_goal.center + aux.Point(0, 0)) / 5 * 3, ballangel)
         elif self.enimes_half(field, actions) == 0:
-            actions[self.idx] = Actions.GoToPoint(aux.Point(field.polarity * 1200, field.polarity * -250), ballangel)
+            actions[self.idx] = Actions.GoToPoint(aux.point_on_line(field.ally_goal.center, go, (field.ally_goal.center - go).mag() * 3 / 5), ballangel)
         else:
-            actions[self.idx] = Actions.GoToPoint(aux.Point(field.polarity * 1200, field.polarity * 250), ballangel)
+            actions[self.idx] = Actions.GoToPoint(aux.point_on_line(field.ally_goal.center, go, (field.ally_goal.center - go).mag() * 3 / 5), ballangel)
         
     def enimes_half(self, field: fld.Field, actions: list[Optional[Action]]) -> int:
         polog_enimes = 0
@@ -79,7 +81,21 @@ class Ronaldo():
             polog_enimes += 1
 
         return polog_enimes
-
+    
+    def opening_to_the_ball(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
+        y = (field.ball.get_pos() - field.allies[self.idx].get_pos()).unity()*50000
+        for idx_enemy in [robot.r_id for robot in field.active_enemies(True)]:
+            print(idx_enemy)
+            if(aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) < 100):
+                e = aux.get_angle_between_points(field.allies[self.idx].get_pos(), field.ball.get_pos(), field.enemies[idx_enemy].get_pos())
+                if(e<0):
+                    if(aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) < 100):
+                        actions[self.idx] = Actions.GoToPointIgnore(aux.rotate(y, 3.14/2), (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg())
+                else:
+                    if(aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) < 100):
+                        actions[self.idx] = Actions.GoToPointIgnore(aux.rotate(y, -3.14/2), (field.ball.get_pos() - field.allies[self.idx].get_pos()).arg())
+            else:
+                print("NOOOOOOOOOOOOO")
 
 
 

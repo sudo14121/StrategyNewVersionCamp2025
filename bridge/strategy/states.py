@@ -13,9 +13,9 @@ class states():
         self.idxN = idx1N
         self.idxR = idx1R
         self.ballMem = [aux.Point(0, 0)] * 5
-        self.goalkeeper = Goalkeeper(self.idxN, self.idxR)
         self.idxE1 = idxE1
         self.idxE2 = idxE2
+        self.goalkeeper = Goalkeeper(self.idxN, self.idxR, self.idxE1, self.idxE2)
         self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
 
 
@@ -69,4 +69,7 @@ class states():
                 actions[self.idxN]  =Actions.Kick(field.allies[self.idxR].get_pos())
         else:
             pass
+
+    def freekick(self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:
+        pass
     

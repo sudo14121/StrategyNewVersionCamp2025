@@ -26,8 +26,9 @@ class Strategy:
         self.idxE1 = 0
         self.idxE2 = 2
         self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
+        self.neymar = Neymar(self.idxR, self.idxN, self.idxE1, self.idxE2)
         self.states = states(self.idxN, self.idxR, self.idxE1, self.idxE2)
-        self.goalkeeper = Goalkeeper(self.idxN, self.idxR)
+        self.goalkeeper = Goalkeeper(self.idxN, self.idxR, self.idxE1, self.idxE2)
 
     def process(self, field: fld.Field) -> list[Optional[Action]]:
         """Game State Management"""
@@ -71,7 +72,8 @@ class Strategy:
         return actions
 
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-        self.ronaldo.run(field, actions)
-        self.goalkeeper.rungoal(field, actions)
+        self.ronaldo.opening_to_the_ball(field, actions)
+        #self.neymar.run(field, actions)
+        #self.goalkeeper.rungoal(field, actions)
            
     
