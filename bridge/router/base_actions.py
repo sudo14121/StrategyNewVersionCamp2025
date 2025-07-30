@@ -161,7 +161,7 @@ class Actions:
                     not aux.is_point_inside_poly(domain.field.ball.get_pos(), domain.field.enemy_goal.hull)
                     and not aux.is_point_inside_poly(domain.field.ball.get_pos(), domain.field.ally_goal.hull)
                 )
-                and (domain.game_state not in [GameStates.STOP, GameStates.PREPARE_KICKOFF] or domain.we_active)
+                and (domain.game_state not in [GameStates.STOP, GameStates.PREPARE_KICKOFF] and domain.we_active)
             )
 
         def behavior(self, domain: ActionDomain, current_action: ActionValues) -> None:
@@ -500,6 +500,8 @@ def calc_passthrough_wp(
     obstacles_dist: list[tuple[Entity, float]] = []
 
     if avoid_ball:
+        if aux.is_point_inside_circle(robot.get_pos(), field.ball.get_pos(), const.KEEP_BALL_DIST - 50):
+            return aux.nearest_point_on_circle(robot.get_pos(), field.ball.get_pos(), const.KEEP_BALL_DIST + 50)
         ball = Entity(
             field.ball.get_pos(),
             field.ball.get_angle(),
