@@ -28,11 +28,11 @@ class states():
     def prepare_penalty(self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:
         ballangel = (field.ball.get_pos() - field.allies[field.gk_id].get_pos()).arg()
         if not (we_active):
-            actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 500, -250), ballangel)
-            actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 500, 250), ballangel)
+            actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 700, -350), ballangel)
+            actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 700, 350), ballangel)
         else:
-            actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * 100, 0), ballangel)
-            actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * 500, 250), ballangel)
+            actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * 400, 0), ballangel)
+            actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * 900, 250), ballangel)
         actions[field.gk_id] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
 
     def penalty (self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:

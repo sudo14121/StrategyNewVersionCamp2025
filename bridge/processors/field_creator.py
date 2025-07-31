@@ -168,7 +168,7 @@ class FieldCreator(BaseProcessor):
                 self.field.update_yel_robot(r_id, new_pos[0], new_pos[1], time())
 
             live_time = self.field.y_team[r_id].live_time()
-            if live_time is not None and time() - live_time > const.TIME_TO_BORN:
+            if live_time is not None and time() - live_time > const.TIME_TO_BORN: # and r_id != 0:
                 self.field.y_team[r_id].used(1)
         for robot in self.field.y_team:
             if time() - robot.last_update() > const.TIME_TO_DIE:

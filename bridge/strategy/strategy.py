@@ -72,10 +72,15 @@ class Strategy:
         return actions
 
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-        self.ronaldo.run(field, actions)
-        self.neymar.run(field, actions)
-        self.goalkeeper.rungoal(field, actions)
-        '''if field.ally_color == const.Color.YELLOW:
-            actions[field.gk_id] = Actions.Kick(aux.Point(0, 0))'''
+        self.logicrun(field, actions)
            
     
+    def logicrun(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
+        if field.allies[self.idxR].is_used() and field.allies[self.idxN].is_used():
+            self.ronaldo.run(field, actions)
+            self.neymar.run(field, actions)
+        elif not field.allies[self.idxR].is_used():
+            self.neymar.attacher(field, actions)
+        elif not field.allies[self.idxN].is_used():
+            self.ronaldo.attacher(field, actions)
+        self.goalkeeper.rungoal(field, actions)

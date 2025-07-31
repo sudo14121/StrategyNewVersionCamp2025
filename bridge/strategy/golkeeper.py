@@ -23,7 +23,8 @@ class Goalkeeper():
         self.idx_enem2 = idxE2
 
     def rungoal(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-       
+        flb = True
+        flg = True
         robot_pos_gk = field.allies[self.gk_idx].get_pos()
         robot_pos1 = field.allies[self.idx1].get_pos()
         robot_pos2 = field.allies[self.idx2].get_pos()
@@ -53,24 +54,41 @@ class Goalkeeper():
         if field.ball_start_point is not None:
             goal_position = aux.closest_point_on_line(field.ball_start_point, ball, robot_pos_gk, "R")
         else:
-            goal_position = field.ally_goal.center
+            goal_position = aux.point_on_line(field.ally_goal.frw, field.ally_goal.center, 250)
 
         position_goal = aux.is_point_inside_poly(goal_position, field.ally_goal.hull)
 
         if position_goal == False:
-            goal_position = field.ally_goal.center
+            goal_position = aux.point_on_line(field.ally_goal.frw, field.ally_goal.center, 250)
 
         angle_goalkeeper = (ball - robot_pos_gk).arg()
         
         if (aux.Point(0, 0) - goal_position).mag() > (aux.Point(0, 0) - field.ally_goal.center).mag():
-            goal_position = (field.ally_goal.center + field.ally_goal.frw) / 3
-        
-        actions[self.gk_idx] = Actions.GoToPoint(goal_position, angle_goal_ball)
-    
-        if aux.is_point_inside_poly(field.ball.get_pos(), field.ally_goal.hull):
-            actions[self.gk_idx] = Actions.Kick(goal_position_gates, voltage_kik, is_upper=True)
+            goal_position = aux.point_on_line(field.ally_goal.frw, field.ally_goal.center, 250)
 
+        if field.polarity > 0:
+            if abs(field.ally_goal.center.x - goal_position.x) < 120:
+                goal_position.x = field.ally_goal.center.x - 120
+        else:
+            if abs(field.ally_goal.center.x - goal_position.x) < 120:
+                goal_position.x = field.ally_goal.center.x + 120 
+
+        field.strategy_image.draw_circle(goal_position)
+        field.strategy_image.draw_circle(goal_position_gates, color=(255, 255, 255))
+
+        if abs(field.ball.get_pos().x - field.ally_goal.center.x) < 100:
+            flb = False 
+        
+        
     
-        if field.is_ball_in(field.allies[self.gk_idx]):
+        if aux.is_point_inside_poly(field.ball.get_pos(), field.ally_goal.hull) and flb:
+            actions[self.gk_idx] = Actions.Kick(goal_position_gates, voltage_kik, is_upper=True)
+            flg = False
+
+        if field.is_ball_in(field.allies[self.gk_idx]) and flb:
             actions[self.gk_idx] = Actions.Kick(goal_position_gates, voltage_kik,is_upper=True)
+            flg = False
             
+        if flg:
+            actions[self.gk_idx] = Actions.GoToPoint(goal_position, angle_goal_ball)
+

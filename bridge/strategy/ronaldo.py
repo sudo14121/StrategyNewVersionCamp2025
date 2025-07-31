@@ -24,6 +24,17 @@ class Ronaldo():
         actions[self.idx] = Actions.Kick(go)
         print(actions[self.idx])
 
+    def choose_point_to_goal_with_robots(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
+        angleD = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.down))
+        angleU = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.up))
+        k = 80
+        if angleD > angleU:
+            go = field.enemy_goal.down + (field.enemy_goal.eye_up * k)
+        else:
+            go = field.enemy_goal.up - (field.enemy_goal.eye_up * k)
+        actions[self.idx] = Actions.Kick(go)
+        print(actions[self.idx])
+
     def penalty(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         k = 90
         up = field.enemy_goal.up - (field.enemy_goal.eye_up * k)
