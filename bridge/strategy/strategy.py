@@ -21,10 +21,10 @@ class Strategy:
         self, field: fld.Field
     ) -> None:
         self.we_active = False
-        self.idxR = 0
-        self.idxN = 2
-        self.idxE1 = 0
-        self.idxE2 = 2
+        self.idxR = 7
+        self.idxN = 1
+        self.idxE1 = 5
+        self.idxE2 = 6
         self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
         self.neymar = Neymar(self.idxR, self.idxN, self.idxE1, self.idxE2)
         self.states = states(self.idxN, self.idxR, self.idxE1, self.idxE2, field.gk_id, field.enemy_gk_id)
@@ -45,7 +45,7 @@ class Strategy:
         if field.ally_color == const.COLOR:
             text = str(field.game_state) + "  we_active:" + str(self.we_active)
             field.strategy_image.print(aux.Point(600, 780), text, need_to_scale=False)
-            #print(text)
+            print(text)
             
         match field.game_state:
             case GameStates.RUN:
@@ -79,8 +79,11 @@ class Strategy:
         if field.allies[self.idxR].is_used() and field.allies[self.idxN].is_used():
             self.ronaldo.run(field, actions)
             self.neymar.run(field, actions)
+            print("1")
         elif not field.allies[self.idxR].is_used():
             self.neymar.attacher(field, actions)
+            print("2")
         elif not field.allies[self.idxN].is_used():
             self.ronaldo.attacher(field, actions)
+            print("3")
         self.goalkeeper.rungoal(field, actions)

@@ -1,4 +1,5 @@
 from typing import Optional
+from time import time
 
 from bridge import const
 from bridge.auxiliary import aux, fld, rbt  # type: ignore
@@ -12,6 +13,7 @@ class Ronaldo():
         self.ballMem = [aux.Point(0, 0)] * 5
         self.idxE1 = idxE1
         self.idxE2 = idxE2
+        self.timer = None
         
     def choose_point_to_goal(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         angleD = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.down))
@@ -32,8 +34,37 @@ class Ronaldo():
             go = field.enemy_goal.down + (field.enemy_goal.eye_up * k)
         else:
             go = field.enemy_goal.up - (field.enemy_goal.eye_up * k)
-        actions[self.idx] = Actions.Kick(go)
-        print(actions[self.idx])
+
+        enime_dist1 = (field.allies[field.gk_id].get_pos() - field.enemies[self.idxE1].get_pos()).mag()
+        enime_dist2 = (field.allies[field.gk_id].get_pos() - field.enemies[self.idxE2].get_pos()).mag()
+        
+        if enime_dist1 < enime_dist2:
+            if field.polarity:
+                if field.enemies[self.idxE2].get_pos().x > field.allies[self.idx].get_pos().x:
+                    actions[self.idx] = Actions.Kick(go)
+                else:
+                    s = (field.enemies[field.gk_id].get_pos() - field.enemies[self.idxE2].get_pos()) / 2 + field.allies[self.idx].get_pos()
+                    actions[self.idx] = Actions.Kick(s)
+            else:
+                if field.enemies[self.idxE2].get_pos().x < field.allies[self.idx].get_pos().x:
+                    actions[self.idx] = Actions.Kick(go)
+                else:
+                    s = (field.enemies[field.gk_id].get_pos() - field.enemies[self.idxE2].get_pos()) / 2 + field.allies[self.idx].get_pos()
+                    actions[self.idx] = Actions.Kick(s)
+        else:
+            if field.polarity:
+                if field.enemies[self.idxE1].get_pos().x > field.allies[self.idx].get_pos().x:
+                    actions[self.idx] = Actions.Kick(go)
+                else:
+                    s = (field.enemies[field.gk_id].get_pos() - field.enemies[self.idxE1].get_pos()) / 2 + field.allies[self.idx].get_pos()
+                    actions[self.idx] = Actions.Kick(s)
+            else:
+                if field.enemies[self.idxE1].get_pos().x < field.allies[self.idx].get_pos().x:
+                    actions[self.idx] = Actions.Kick(go)
+                else:
+                    s = (field.enemies[field.gk_id].get_pos() - field.enemies[self.idxE1].get_pos()) / 2 + field.allies[self.idx].get_pos()
+                    actions[self.idx] = Actions.Kick(s)
+        
 
     def penalty(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         k = 90

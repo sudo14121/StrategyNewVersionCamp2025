@@ -54,7 +54,7 @@ class states():
     def prepare_kikoff(self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:
         ballangel1 = (field.ball.get_pos() - field.allies[self.idxR].get_pos()).arg()
         ballangel2 = (field.ball.get_pos() - field.allies[self.idxN].get_pos()).arg()
-
+        
         if not we_active:
             ronaldoxy = aux.get_line_intersection(field.ally_goal.frw_up, field.ally_goal.center_up, aux.Point(0, 100), aux.Point(0, 0), "LL")
             ronaldoxy2 = aux.get_line_intersection(field.ally_goal.frw_down, field.ally_goal.center_down, aux.Point(0, 100), aux.Point(0, 0), "LL")
@@ -66,29 +66,46 @@ class states():
             actions[self.idxN] = Actions.GoToPoint(ronaldoxy2, ballangel2)
             actions[self.idxR] = Actions.GoToPoint(ronaldoxy, ballangel1)
 
+
         ballangel = (field.ball.get_pos() - field.allies[field.gk_id].get_pos()).arg()
         actions[field.gk_id] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
     
     def kikoff(self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:
-        ronaldoxy2 = aux.point_on_line(field.ball.get_pos(), field.ally_goal.center, -350)
-        print(we_active)
-        if we_active:
-            if (field.allies[self.idxN].get_pos() + ronaldoxy2).mag() < 20:
-                ballangel2 = (field.ball.get_pos() - field.allies[self.idxN].get_pos()).arg()
-                actions[self.idxN] = Actions.GoToPoint(ronaldoxy2, ballangel2)
-            else:
-                actions[self.idxN]  =Actions.Kick(field.allies[self.idxR].get_pos())
+        if field.allies[self.idxR].is_used() and field.allies[self.idxN].is_used():
+            ronaldoxy2 = aux.point_on_line(field.ball.get_pos(), field.ally_goal.center, -350)
+            if we_active:
+                if (field.allies[self.idxN].get_pos() + ronaldoxy2).mag() < 20:
+                    ballangel2 = (field.ball.get_pos() - field.allies[self.idxN].get_pos()).arg()
+                    actions[self.idxN] = Actions.GoToPoint(ronaldoxy2, ballangel2)
+                else:
+                    actions[self.idxN] = Actions.Kick(field.allies[self.idxR].get_pos())
+
+        elif not field.allies[self.idxR].is_used() and field.allies[self.idxN].is_used():
+            if we_active:
+                self.neymar.choose_point_to_goal(field, actions)
+
+        elif not field.allies[self.idxN].is_used() and field.allies[self.idxR].is_used():
+            if we_active:
+                print("YES")
+                self.ronaldo.choose_point_to_goal(field, actions)
         else:
-            pass
+            actions[field.gk_id] = Actions.GoToPoint(field.enemy_goal.center, 0)
 
     def freekick(self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:
         if we_active:
-            if self.ronaldo.ifiam(field, actions):
-                self.neymar.opening_to_the_ball(field, actions)
-                self.ronaldo.passs(field, actions)
+            if field.allies[self.idxN].is_used() and field.allies[self.idxR].is_used():
+                if self.ronaldo.ifiam(field, actions):
+                    self.neymar.opening_to_the_ball(field, actions)
+                    self.ronaldo.passs(field, actions)
+                else:
+                    self.ronaldo.opening_to_the_ball(field, actions)
+                    self.neymar.passs(field, actions)
+            elif not field.allies[self.idxN].is_used() and field.allies[self.idxR].is_used():
+                self.ronaldo.choose_point_to_goal(field, actions)
+            elif not field.allies[self.idxR].is_used() and field.allies[self.idxN].is_used():
+                self.neymar.choose_point_to_goal(field, actions)
             else:
-                self.ronaldo.opening_to_the_ball(field, actions)
-                self.neymar.passs(field, actions)
+                actions[field.gk_id] = Actions.GoToPoint(field.enemy_goal.center, 0)
         else:
             actions[self.idxR] = Actions.GoToPoint(aux.point_on_line(field.ball.get_pos(), fld.find_nearest_robot(field.ball.get_pos(), field.enemies).get_pos(), -500), (field.ball.get_pos() - field.allies[self.idxR].get_pos()).arg())
             self.neymar.protect(field, actions)

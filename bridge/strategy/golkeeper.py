@@ -37,8 +37,8 @@ class Goalkeeper():
         ball = field.ball.get_pos()
 
 
-        g_up_xy_goal = field.enemy_goal.up #- field.enemy_goal.eye_up * 50    
-        g_down_xy_goal = field.enemy_goal.down #+ field.enemy_goal.eye_up * 50
+        g_up_xy_goal = field.enemy_goal.up - field.enemy_goal.eye_up * 50    
+        g_down_xy_goal = field.enemy_goal.down + field.enemy_goal.eye_up * 50
 
         up_goal = (g_up_xy_goal - robot_pos_gk_enem).mag()
         down_goal = (robot_pos_gk_enem + g_down_xy_goal).mag()

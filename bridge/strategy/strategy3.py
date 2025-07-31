@@ -21,9 +21,9 @@ class Strategy:
         self, field: fld.Field
     ) -> None:
         self.we_active = False
-        self.idxR = 6
-        self.idxN = 3
-        self.idxE1 = 7
+        self.idxR = 0
+        self.idxN = 2
+        self.idxE1 = 0
         self.idxE2 = 2
         self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
         self.neymar = Neymar(self.idxR, self.idxN, self.idxE1, self.idxE2)
@@ -64,7 +64,7 @@ class Strategy:
             case GameStates.KICKOFF:
                 self.states.kikoff(field, actions, self.we_active)
             case GameStates.FREE_KICK:
-                pass
+                self.states.freekick(field, actions, self.we_active)
             case GameStates.STOP:
                 # The router will automatically prevent robots from getting too close to the ball
                 self.run(field, actions)
@@ -72,10 +72,15 @@ class Strategy:
         return actions
 
     def run(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-        self.ronaldo.run(field, actions)
-        self.neymar.run(field, actions)
-        self.goalkeeper.rungoal(field, actions)
-        '''if field.ally_color == const.Color.YELLOW:
-            actions[field.gk_id] = Actions.Kick(aux.Point(0, 0))'''
+        self.logicrun(field, actions)
            
     
+    def logicrun(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
+        if field.allies[self.idxR].is_used() and field.allies[self.idxN].is_used():
+            self.ronaldo.run(field, actions)
+            self.neymar.run(field, actions)
+        elif not field.allies[self.idxR].is_used():
+            self.neymar.attacher(field, actions)
+        elif not field.allies[self.idxN].is_used():
+            self.ronaldo.attacher(field, actions)
+        self.goalkeeper.rungoal(field, actions)
