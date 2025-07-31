@@ -58,17 +58,17 @@ class states():
         if not we_active:
             ronaldoxy = aux.get_line_intersection(field.ally_goal.frw_up, field.ally_goal.center_up, aux.Point(0, 100), aux.Point(0, 0), "LL")
             ronaldoxy2 = aux.get_line_intersection(field.ally_goal.frw_down, field.ally_goal.center_down, aux.Point(0, 100), aux.Point(0, 0), "LL")
-            actions[self.idxN] = Actions.GoToPoint((ronaldoxy2 + field.ally_goal.frw_down) / 2, ballangel2) #type:ignore
-            actions[self.idxR] = Actions.GoToPoint((ronaldoxy + field.ally_goal.frw_up) / 2, ballangel1) #type:ignore
+            actions[self.idxN] = Actions.CatchBall((ronaldoxy2 + field.ally_goal.frw_down) / 2, ballangel2) #type:ignore
+            actions[self.idxR] = Actions.CatchBall((ronaldoxy + field.ally_goal.frw_up) / 2, ballangel1) #type:ignore
         else:
             ronaldoxy = aux.point_on_line(field.ball.get_pos(), field.ally_goal.center, 1000)
             ronaldoxy2 = aux.point_on_line(field.ball.get_pos(), field.ally_goal.center, 250)
-            actions[self.idxN] = Actions.GoToPoint(ronaldoxy2, ballangel2)
-            actions[self.idxR] = Actions.GoToPoint(ronaldoxy, ballangel1)
+            actions[self.idxN] = Actions.CatchBall(ronaldoxy2, ballangel2)
+            actions[self.idxR] = Actions.CatchBall(ronaldoxy, ballangel1)
 
 
         ballangel = (field.ball.get_pos() - field.allies[field.gk_id].get_pos()).arg()
-        actions[field.gk_id] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
+        actions[field.gk_id] = Actions.CatchBall((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
     
     def kikoff(self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:
         if field.allies[self.idxR].is_used() and field.allies[self.idxN].is_used():

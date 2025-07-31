@@ -21,10 +21,10 @@ class Strategy:
         self, field: fld.Field
     ) -> None:
         self.we_active = False
-        self.idxR = 7
-        self.idxN = 1
-        self.idxE1 = 5
-        self.idxE2 = 6
+        self.idxR = 5
+        self.idxN = 6
+        self.idxE1 = 7
+        self.idxE2 = 2
         self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
         self.neymar = Neymar(self.idxR, self.idxN, self.idxE1, self.idxE2)
         self.states = states(self.idxN, self.idxR, self.idxE1, self.idxE2, field.gk_id, field.enemy_gk_id)
@@ -54,7 +54,7 @@ class Strategy:
                 pass
             case GameStates.HALT:
                 self.states.halt(field, actions)
-                return [None] * const.TEAM_ROBOTS_MAX_COUNT
+                return [Actions.Stop()] * const.TEAM_ROBOTS_MAX_COUNT
             case GameStates.PREPARE_PENALTY:
                 self.states.prepare_penalty(field, actions, self.we_active)
             case GameStates.PENALTY:

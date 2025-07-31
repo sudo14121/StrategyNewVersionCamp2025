@@ -29,7 +29,7 @@ class Ronaldo():
     def choose_point_to_goal_with_robots(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
         angleD = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.down))
         angleU = abs(aux.get_angle_between_points(field.enemies[const.ENEMY_GK].get_pos(), field.allies[self.idx].get_pos(), field.enemy_goal.up))
-        k = 80
+        k = 100
         if angleD > angleU:
             go = field.enemy_goal.down + (field.enemy_goal.eye_up * k)
         else:
@@ -134,12 +134,12 @@ class Ronaldo():
                 if(e>0):
                     if(aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) < 120):
                         pointg = aux.nearest_point_on_circle(aux.rotate(y, 3.14/2) + field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), 1000)
-                        actions[self.idx] = Actions.GoToPoint(self.iffiil(field, actions, pointg), angl)
+                        actions[self.idx] = Actions.CatchBall(self.iffiil(field, actions, pointg), angl)
                         field.strategy_image.draw_circle(self.iffiil(field, actions, pointg))
                 else:
                     if(aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) < 120):
                         pointg = aux.nearest_point_on_circle(aux.rotate(y, -3.14/2) + field.allies[self.idx].get_pos(), field.enemies[idx_enemy].get_pos(), 1000)
-                        actions[self.idx] = Actions.GoToPoint(self.iffiil(field, actions, pointg), angl)
+                        actions[self.idx] = Actions.CatchBall(self.iffiil(field, actions, pointg), angl)
                         field.strategy_image.draw_circle(self.iffiil(field, actions, pointg))
             
         
