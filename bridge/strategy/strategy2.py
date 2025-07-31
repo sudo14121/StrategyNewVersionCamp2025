@@ -21,9 +21,9 @@ class Strategy:
         self, field: fld.Field
     ) -> None:
         self.we_active = False
-        self.idxR = 0
-        self.idxN = 2
-        self.idxE1 = 0
+        self.idxR = 6
+        self.idxN = 3
+        self.idxE1 = 7
         self.idxE2 = 2
         self.ronaldo = Ronaldo(self.idxR, self.idxN, self.idxE1, self.idxE2)
         self.neymar = Neymar(self.idxR, self.idxN, self.idxE1, self.idxE2)
@@ -64,7 +64,7 @@ class Strategy:
             case GameStates.KICKOFF:
                 self.states.kikoff(field, actions, self.we_active)
             case GameStates.FREE_KICK:
-                self.states.freekick(field, actions, self.we_active)
+                pass
             case GameStates.STOP:
                 # The router will automatically prevent robots from getting too close to the ball
                 self.run(field, actions)

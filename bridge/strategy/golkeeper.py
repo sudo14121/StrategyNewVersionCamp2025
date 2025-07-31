@@ -5,8 +5,8 @@ from bridge.auxiliary import aux, fld, rbt  # type: ignore
 from bridge.const import State as GameStates
 from bridge.router.base_actions import Action, Actions, KickActions 
 
-voltage_kik = 7
-voltage_pas = 5
+voltage_kik = 8
+voltage_pas = 8
 
 
 class Goalkeeper():
@@ -63,10 +63,9 @@ class Goalkeeper():
         angle_goalkeeper = (ball - robot_pos_gk).arg()
         
         if (aux.Point(0, 0) - goal_position).mag() > (aux.Point(0, 0) - field.ally_goal.center).mag():
-            goal_position = field.ally_goal.center
+            goal_position = (field.ally_goal.center + field.ally_goal.frw) / 3
         
         actions[self.gk_idx] = Actions.GoToPoint(goal_position, angle_goal_ball)
-
     
         if aux.is_point_inside_poly(field.ball.get_pos(), field.ally_goal.hull):
             actions[self.gk_idx] = Actions.Kick(goal_position_gates, voltage_kik, is_upper=True)

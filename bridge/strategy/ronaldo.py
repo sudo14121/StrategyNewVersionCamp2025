@@ -111,6 +111,8 @@ class Ronaldo():
         
 
     def passs(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-        pass
-
+        for idx_enemy in [robot.r_id for robot in field.active_enemies(False)]:
+            print(idx_enemy)
+            if not (aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idxN].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) < 120):
+                actions[self.idx] = Actions.Kick(field.allies[self.idxN].get_pos(), 8)
     

@@ -72,10 +72,14 @@ class states():
             pass
 
     def freekick(self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:
-        if self.ronaldo.ifiam(field, actions):
-            #self.ronaldo.passs(field, actions)
-            self.neymar.opening_to_the_ball(field, actions)
+        if we_active:
+            if self.ronaldo.ifiam(field, actions):
+                self.neymar.opening_to_the_ball(field, actions)
+                self.ronaldo.passs(field, actions)
+            else:
+                self.ronaldo.opening_to_the_ball(field, actions)
+                self.neymar.passs(field, actions)
         else:
-            #self.neymar.passs(field, actions)
-            self.ronaldo.opening_to_the_ball(field, actions)
+            actions[self.idxR] = Actions.GoToPoint(aux.point_on_line(field.ball.get_pos(), fld.find_nearest_robot(field.ball.get_pos(), field.enemies).get_pos(), -500), (field.ball.get_pos() - field.allies[self.idxR].get_pos()).arg())
+            self.neymar.protect(field, actions)
     

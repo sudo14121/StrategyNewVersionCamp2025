@@ -8,7 +8,7 @@ from bridge.router.base_actions import Action, Actions, KickActions
 class Neymar():
     def __init__(self, idx1R: int, idx1N: int, idxE1: int, idxE2: int) -> None:
         self.idx = idx1N
-        self.idxN = idx1R
+        self.idxR = idx1R
         self.ballMem = [aux.Point(0, 0)] * 5
         self.idxE1 = idxE1
         self.idxE2 = idxE2
@@ -25,7 +25,7 @@ class Neymar():
         print(actions[self.idx])
 
     def ifiam (self, field: fld.Field, actions: list[Optional[Action]]) -> bool:
-        if (field.allies[self.idx].get_pos() - field.ball.get_pos()).mag() < (field.allies[self.idxN].get_pos() - field.ball.get_pos()).mag():
+        if (field.allies[self.idx].get_pos() - field.ball.get_pos()).mag() < (field.allies[self.idxR].get_pos() - field.ball.get_pos()).mag():
             return True
         else:
             return False
@@ -95,4 +95,7 @@ class Neymar():
             return aux.nearest_point_in_poly(p, field.hull)
     
     def passs(self, field: fld.Field, actions: list[Optional[Action]]) -> None:
-        pass
+        for idx_enemy in [robot.r_id for robot in field.active_enemies(False)]:
+            print(idx_enemy)
+            if not (aux.dist(aux.closest_point_on_line(field.ball.get_pos(), field.allies[self.idxR].get_pos(), field.enemies[idx_enemy].get_pos(), "S"), field.enemies[idx_enemy].get_pos()) < 120):
+                actions[self.idx] = Actions.Kick(field.allies[self.idxR].get_pos(), 8)
