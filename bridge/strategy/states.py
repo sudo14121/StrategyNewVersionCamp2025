@@ -31,15 +31,25 @@ class states():
             actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 700, -350), ballangel)
             actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * -1 * 700, 350), ballangel)
         else:
-            actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * 400, 0), ballangel)
-            actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * 900, 250), ballangel)
+            if field.allies[self.idxR].is_used():
+                actions[self.idxR] = Actions.GoToPoint(aux.Point(field.polarity * 400, 0), ballangel)
+                actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * 900, 250), ballangel)
+            else:
+                actions[self.idxN] = Actions.GoToPoint(aux.Point(field.polarity * 400, 0), ballangel)
+            
         actions[field.gk_id] = Actions.GoToPoint((field.ally_goal.frw + field.ally_goal.center) / 2, ballangel)
 
     def penalty (self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:
-        if we_active:
-            self.ronaldo.choose_point_to_goal(field, actions)
+        if not field.allies[self.idxR].is_used():
+            if we_active:
+                self.neymar.choose_point_to_goal(field, actions)
+            else:
+                self.goalkeeper.rungoal(field, actions)
         else:
-            self.goalkeeper.rungoal(field, actions)
+            if we_active:
+                self.ronaldo.choose_point_to_goal(field, actions)
+            else:
+                self.goalkeeper.rungoal(field, actions)
     
     def prepare_kikoff(self, field: fld.Field, actions: list[Optional[Action]], we_active: bool) -> None:
         ballangel1 = (field.ball.get_pos() - field.allies[self.idxR].get_pos()).arg()
